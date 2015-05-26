@@ -109,21 +109,23 @@ public class ProfNetwork {
       int rowCount = 0;
 
       // iterates through the result set and output them to standard out.
-      boolean outputHeader = true;
+      boolean outputHeader = false;
       while (rs.next()){
-	 if(outputHeader){
-	    for(int i = 1; i <= numCol; i++){
-		System.out.print(rsmd.getColumnName(i) + "\t");
-	    }
-	    System.out.println();
-	    outputHeader = false;
-	 }
-         for (int i=1; i<=numCol; ++i)
+		if(outputHeader){
+			for(int i = 1; i <= numCol; i++){
+				System.out.print(rsmd.getColumnName(i) + "\t");
+			}
+			System.out.println();
+			outputHeader = false;
+		}
+         for (int i=1; i<=numCol; ++i){
             System.out.print (rs.getString (i) + "\t");
+		 }
          System.out.println ();
          ++rowCount;
       }//end while
       stmt.close ();
+	  System.out.println("\n");
       return rowCount;
    }//end executeQuery
 
@@ -274,7 +276,7 @@ public class ProfNetwork {
                 System.out.println(".........................");
                 System.out.println("9. Log out");
                 switch (readChoice()){
-                   case 1: FriendList(esql); break;
+                   case 1: FriendList(esql, authorisedUser); break;
                    case 2: UpdateProfile(esql); break;
                    case 3: NewMessage(esql); break;
                    case 4: SendRequest(esql); break;
@@ -348,8 +350,7 @@ public class ProfNetwork {
       }catch(Exception e){
          //System.err.println (e.getMessage ());
 		 String error = e.getMessage();
-		 if(error.toLowerCase().contains("duplicate"))
-		 {
+		 if(error.toLowerCase().contains("duplicate")){
 			 System.out.print("\t\nERROR: User login already exists. Please try again.\n");
 		 }
       }
@@ -368,8 +369,13 @@ public class ProfNetwork {
 
          String query = String.format("SELECT * FROM USR WHERE userId = '%s' AND password = '%s'", login, password);
          int userNum = esql.executeQuery(query);
-	 if (userNum > 0)
+	 if (userNum > 0){		 
 		return login;
+	 }
+	 else
+	 {
+		System.out.println("\t\nThe credentials provided were not valid. Please try again.\n");
+	 }
          return null;
       }catch(Exception e){
          System.err.println (e.getMessage ());
@@ -378,7 +384,21 @@ public class ProfNetwork {
    }//end
 
 // Rest of the functions definition go in here
-   public static void FriendList(ProfNetwork esql){
+
+	// query to print the friends list of the user
+   public static void FriendList(ProfNetwork esql, String currentUser){
+	   try{
+			String query = String.format("SELECT connectionid FROM connection_usr WHERE userID = '%s' and status										= '%s' UNION SELECT userID FROM connection_usr WHERE connectionid = '%s' and status= '%s'", 
+						   currentUser, "Accept", currentUser, "Accept");
+	   System.out.println("\nFriends List:");
+	   int result = esql.executeQueryAndPrintResult(query);
+	   if(result == 0){
+			System.out.println("You currently do not have any friends. Try sending connection requests.\n");
+	   }
+	   }catch(Exception e){
+		   System.err.println (e.getMessage());
+	   }
+
    }
 
    public static void UpdateProfile(ProfNetwork esql){

@@ -341,12 +341,17 @@ public class ProfNetwork {
          String email = in.readLine();
 
 	 //Creating empty contact\block lists for a user
-	 String query = String.format("INSERT INTO USR (userId, password, email, contact_list) VALUES ('%s','%s','%s')", login, password, email);
+	 String query = String.format("INSERT INTO USR (userId, password, email) VALUES ('%s','%s','%s')", login, password, email);
 
          esql.executeUpdate(query);
          System.out.println ("User successfully created!");
       }catch(Exception e){
-         System.err.println (e.getMessage ());
+         //System.err.println (e.getMessage ());
+		 String error = e.getMessage();
+		 if(error.toLowerCase().contains("duplicate"))
+		 {
+			 System.out.print("\t\nERROR: User login already exists. Please try again.\n");
+		 }
       }
    }//end
 

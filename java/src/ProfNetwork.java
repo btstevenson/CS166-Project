@@ -29,14 +29,18 @@ import java.util.ArrayList;
  * work with PostgreSQL JDBC drivers.
  *
  */
+
+
+
+
 public class ProfNetwork {
 
    // reference to physical database connection.
    private Connection _connection = null;
-
-   // handling the keyboard inputs through a BufferedReader
+	
+      // handling the keyboard inputs through a BufferedReader
    // This variable can be global for convenience.
-   static BufferedReader in = new BufferedReader(
+   public static BufferedReader in = new BufferedReader(
                                 new InputStreamReader(System.in));
 
    /**
@@ -158,8 +162,9 @@ public class ProfNetwork {
       List<List<String>> result  = new ArrayList<List<String>>();
       while (rs.next()){
           List<String> record = new ArrayList<String>();
-         for (int i=1; i<=numCol; ++i)
+         for (int i=1; i<=numCol; ++i){
             record.add(rs.getString (i));
+		 }
          result.add(record);
       }//end while
       stmt.close ();
@@ -322,6 +327,7 @@ public class ProfNetwork {
          System.out.print("Please make your choice: ");
          try { // read the integer, parse it and break.
             input = Integer.parseInt(in.readLine());
+			System.out.println();
             break;
          }catch (Exception e) {
             System.out.println("Your input is invalid!");
@@ -447,7 +453,6 @@ class Messenger{
 			System.out.println("---------");
 			System.out.println("1. Read Messages");
 			System.out.println("2. Send Messages");
-			System.out.println("3. Delete Messages");
 			System.out.println(".........................");
 			System.out.println("9. Return to main menu\n");
 			
@@ -455,8 +460,6 @@ class Messenger{
 				case 1: ReadMessageMenu(esql, currentUser);
 						break;
 				case 2:
-						break;
-				case 3:
 						break;
 				case 9: menuOn = false; break;
 				
@@ -471,25 +474,38 @@ class Messenger{
 		while(getChoice){
 			System.out.println("\nRead Messages Menu");
 			System.out.println("---------");
-			System.out.println("1. Read new messages");
-			System.out.println("2. Show all read messages");
-			System.out.println("3. Choose specific message");
+			System.out.println("1. Show new messages");
+			System.out.println("2. Read Message");
+			System.out.println("3. Show all received messages");
+			System.out.println("4. Delete received message");
 			System.out.println("---------");
 			System.out.println("9. Return to Messenger Menu\n");
 
 			switch(esql.readChoice()){
 				case 1: try{
-							String query = String.format("SELECT msgid, senderid, receiverid, contents FROM MESSAGE WHERE receiverid = '%s' AND status = '%s' AND (deletestatus = '0' OR deletestatus = '1')", currentUser, "Delivered");
+							String query = String.format("SELECT msgid, senderid FROM message WHERE receiverid = '%s' AND status = '%s' AND (deletestatus = '0' OR deletestatus = '1')", currentUser, "Delivered");
+
 							int result = esql.executeQueryAndPrintResult(query);
 							if(result < 1){
 								System.out.println("There are no unread messages.");
 							}
 						}catch(Exception e){
+							System.err.println(e.getMessage());
 						}
 						break;
-				case 2: 
+				case 2: ReadMessage(esql, currentUser);	 
 						break;
-				case 3:
+				case 3: try{
+							String query = String.format("SELECT msgid,senderid FROM message WHERE receiverid = '%s' AND (status = '%s' OR status = '%s') AND (deletestatus = '0' OR deletestatus ='1')", currentUser, "Delivered", "Read");
+							int result = esql.executeQueryAndPrintResult(query);
+							if(result < 1){
+								System.out.println("There are no messages in your inbox.");
+							}
+						}catch(Exception e){
+							System.err.println(e.getMessage());
+						}
+						break;
+				case 4: DeleteMessage(esql, currentUser, "read");
 						break;
 				case 9: getChoice = false; 
 						break;
@@ -497,13 +513,80 @@ class Messenger{
 			}
 		}
 	}
-
-	public static void ChooseSpecificMessage(ProfNetwork esql, String currentUser){
-	} 
+	
+	public static void ReadMessage(ProfNetwork esql, String currentUser){
+		System.out.print("\t\nPlease enter the message id you would like to read: ");
+		try{
+			String input = esql.in.readLine();
+			int msgid = Integer.parseInt(input.trim());
+			try{
+				System.out.println();
+				String query = String.format("SELECT contents FROM message WHERE msgid = '%s' AND (deletestatus = '0' OR deletestatus = '1')", msgid);
+				int result = esql.executeQueryAndPrintResult(query);
+				if(result < 1){
+					System.out.println("No message found with that id. Please try again.");
+				}
+				else{
+					try{
+						query = String.format("UPDATE message SET status = '%s' WHERE msgid = '%s'", "Read", msgid);
+						esql.executeUpdate(query);
+					}catch (Exception e){
+					}
+				}
+			}catch (Exception e){
+				System.err.println(e.getMessage());
+			}
+		}catch (Exception e){
+			System.out.println("Invalid input. The message id is an integer. Please try again");
+		}
+	}
 
 	public static void SendMessageMenu(ProfNetwork esql, String currentUser){
 	}
 
-	public static void DeleteMessageMenu(ProfNetwork esql, String currentUser){
+	public static void DeleteMessage(ProfNetwork esql, String currentUser, String type){
+		System.out.print("Please enter the message id that you would like to delete: ");
+		try{
+			String input = esql.in.readLine();
+			int msgid = Integer.parseInt(input.trim());
+			try{
+				if(type.equals("send")){
+					String query = String.format("SELECT deletestatus FROM message WHERE msgid = '%s' AND senderid = '%s'", msgid, currentUser);
+					List<List<String>> result = new ArrayList<List<String>>();
+					result = esql.executeQueryAndReturnResult(query);
+					try{
+						if(result.get(0).get(0).equals("0")){
+							query = String.format("UPDATE message set deletestatus = '1' WHERE msgid = '%s'", msgid);
+							esql.executeUpdate(query);
+						} else{
+							query = String.format("DELETE FROM message WHERE msgid = '%s'", msgid);
+							esql.executeUpdate(query);
+						}
+					} catch (Exception e){
+						System.err.println(e.getMessage());
+					}
+				} else {
+					String query = String.format("SELECT deletestatus FROM message WHERE msgid = '%s' AND receiverid = '%s'", msgid, currentUser);
+					List<List<String>> result = new ArrayList<List<String>>();
+					result = esql.executeQueryAndReturnResult(query);
+					try{
+						if(result.get(0).get(0).equals("0")){
+				
+							query = String.format("UPDATE message SET deletestatus = '2' WHERE msgid = '%s'", msgid);
+							esql.executeUpdate(query);
+						} else{
+							query = String.format("DELETE FROM message WHERE msgid = '%s'", msgid);
+							esql.executeUpdate(query);
+						}
+					} catch (Exception e){
+						System.err.println(e.getMessage());
+					}
+				}
+			} catch (Exception e){
+				System.err.println(e.getMessage());
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
 	}
 }

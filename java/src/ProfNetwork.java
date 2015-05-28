@@ -271,14 +271,16 @@ public class ProfNetwork {
                 System.out.println("---------");
                 System.out.println("1. Goto Friend List");
                 System.out.println("2. Update Profile");
-                System.out.println("3. Write a new message");
+                System.out.println("3. Messages");
                 System.out.println("4. Send Friend Request");
                 System.out.println(".........................");
                 System.out.println("9. Log out");
                 switch (readChoice()){
                    case 1: FriendList(esql, authorisedUser); break;
                    case 2: UpdateProfile(esql); break;
-                   case 3: NewMessage(esql); break;
+                   case 3: Messenger menu = new Messenger();
+						   menu.MessageService(esql, authorisedUser); 
+						   break;
                    case 4: SendRequest(esql); break;
                    case 9: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
@@ -413,3 +415,95 @@ public class ProfNetwork {
 
 
 }//end ProfNetwork
+
+/********************************************************
+* Messenger Class
+* Programmer: Brandon Stevenson
+* Date: 5/27/15
+* Purpose: To provide a ui for the user in order to
+*		   facilitate the reading, sending, deleting
+*		   of messages from the DBMS.
+*
+********************************************************/
+class Messenger{
+
+	/*************************************
+	* Method: MessageService
+	* Programmer: Brandon Stevenson
+	* Date: 5/27/15
+	* Purpose: Provides ui to give access
+	*          to message options
+	*
+	* Inputs: Profnetwork object
+	*		  String currenUser
+	*
+	* Return: none
+	*
+	*************************************/
+	public static void MessageService(ProfNetwork esql, String currentUser){
+		boolean menuOn = true;
+		while(menuOn){
+			System.out.println("\nMessenger Menu");
+			System.out.println("---------");
+			System.out.println("1. Read Messages");
+			System.out.println("2. Send Messages");
+			System.out.println("3. Delete Messages");
+			System.out.println(".........................");
+			System.out.println("9. Return to main menu\n");
+			
+			switch(esql.readChoice()){
+				case 1: ReadMessageMenu(esql, currentUser);
+						break;
+				case 2:
+						break;
+				case 3:
+						break;
+				case 9: menuOn = false; break;
+				
+				default: System.out.println("\nERROR: Choice is not valid. Please try again.\n");
+						
+			}
+		}
+	}
+
+	public static void ReadMessageMenu(ProfNetwork esql, String currentUser){
+		boolean getChoice = true;
+		while(getChoice){
+			System.out.println("\nRead Messages Menu");
+			System.out.println("---------");
+			System.out.println("1. Read new messages");
+			System.out.println("2. Show all read messages");
+			System.out.println("3. Choose specific message");
+			System.out.println("---------");
+			System.out.println("9. Return to Messenger Menu\n");
+
+			switch(esql.readChoice()){
+				case 1: try{
+							String query = String.format("SELECT msgid, senderid, receiverid, contents FROM MESSAGE WHERE receiverid = '%s' AND status = '%s' AND (deletestatus = '0' OR deletestatus = '1')", currentUser, "Delivered");
+							int result = esql.executeQueryAndPrintResult(query);
+							if(result < 1){
+								System.out.println("There are no unread messages.");
+							}
+						}catch(Exception e){
+						}
+						break;
+				case 2: 
+						break;
+				case 3:
+						break;
+				case 9: getChoice = false; 
+						break;
+				default: System.out.println("\nERROR: Invalid input. Please try again.\n");
+			}
+		}
+	}
+
+	public static void ChooseSpecificMessage(ProfNetwork esql, String currentUser){
+	} 
+
+	public static void SendMessageMenu(ProfNetwork esql, String currentUser){
+	}
+
+	public static void DeleteMessageMenu(ProfNetwork esql, String currentUser){
+	}
+}

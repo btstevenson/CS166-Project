@@ -24,12 +24,13 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.ArrayList;
 
+
+
 /**
  * This class defines a simple embedded SQL utility class that is designed to
  * work with PostgreSQL JDBC drivers.
  *
  */
-
 
 
 
@@ -451,8 +452,8 @@ class Messenger{
 		while(menuOn){
 			System.out.println("\nMessenger Menu");
 			System.out.println("---------");
-			System.out.println("1. Read Messages");
-			System.out.println("2. Send Messages");
+			System.out.println("1. Read Menu");
+			System.out.println("2. Send Menu");
 			System.out.println(".........................");
 			System.out.println("9. Return to main menu\n");
 			
@@ -543,27 +544,29 @@ class Messenger{
 
 	public static void SendMessageMenu(ProfNetwork esql, String currentUser){
 		boolean getChoice = true;
-		System.out.println("\nSend Messages Menu");
-		System.out.println("---------");
-		System.out.println("1. Send Message");
-		System.out.println("2. List of Sent Messages");
-		System.out.println("3. View a Sent Message");
-		System.out.println("4. Delete Sent Message");
-		System.out.println("---------");
-		System.out.println("9. Return to Messenger Menu");
+		while(getChoice){
+			System.out.println("\nSend Messages Menu");
+			System.out.println("---------");
+			System.out.println("1. Send Message");
+			System.out.println("2. List of Sent Messages");
+			System.out.println("3. View a Sent Message");
+			System.out.println("4. Delete Sent Message");
+			System.out.println("---------");
+			System.out.println("9. Return to Messenger Menu");
 
-		switch(esql.readChoice()){
-			case 1: SendMessage(esql, currentUser);
-					break;
-			case 2:
-					break;
-			case 3:
-					break;
-			case 4: DeleteMessage(esql, currentUser, "send");
-					break;
-			case 9:
-					break;
-			default: System.out.println("Invalid Choice. Please try again.");
+			switch(esql.readChoice()){
+				case 1: SendMessage(esql, currentUser);
+						break;
+				case 2: ListSentMessages(esql, currentUser);
+						break;
+				case 3: ViewSentMessage(esql, currentUser);
+						break;
+				case 4: DeleteMessage(esql, currentUser, "send");
+						break;
+				case 9: getChoice = false;
+						break;
+				default: System.out.println("Invalid Choice. Please try again.");
+			}
 		}
 	}
 
@@ -578,6 +581,42 @@ class Messenger{
 					esql.executeUpdate(query);
 			} catch (Exception e){
 				System.err.println(e.getMessage());
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
+	}
+
+	public static void ListSentMessages(ProfNetwork esql, String currentUser){
+		try{
+			String query = String.format("Select msgid, receiverid, status FROM message WHERE senderid = '%s' AND (deletestatus = '0' OR deletestatus = '2')", currentUser);
+			int result = esql.executeQueryAndPrintResult(query);
+			if(result < 1){
+				System.out.println("You have no sent messages.");
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
+	}
+
+	public static void ViewSentMessage(ProfNetwork esql, String currentUser){
+		try{
+			System.out.print("Please enter the message id you want to view: ");
+			String input = esql.in.readLine();
+			try{
+				int msgid = Integer.parseInt(input.trim());
+				try{
+					System.out.print("\nMessage: ");
+					String query = String.format("SELECT contents FROM message WHERE msgid = '%s' AND senderid = '%s'", msgid, currentUser);
+					int result = esql.executeQueryAndPrintResult(query);
+					if(result < 1){
+						System.out.println("There is no sent message with that id. Please try again.");
+					}
+				} catch (Exception e){
+					System.err.println(e.getMessage());
+				}
+			} catch (Exception e){
+				System.out.println("ERROR: Invalid input. Please enter an integer.");
 			}
 		} catch (Exception e){
 			System.err.println(e.getMessage());

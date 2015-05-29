@@ -459,7 +459,7 @@ class Messenger{
 			switch(esql.readChoice()){
 				case 1: ReadMessageMenu(esql, currentUser);
 						break;
-				case 2:
+				case 2: SendMessageMenu(esql, currentUser);
 						break;
 				case 9: menuOn = false; break;
 				
@@ -542,6 +542,46 @@ class Messenger{
 	}
 
 	public static void SendMessageMenu(ProfNetwork esql, String currentUser){
+		boolean getChoice = true;
+		System.out.println("\nSend Messages Menu");
+		System.out.println("---------");
+		System.out.println("1. Send Message");
+		System.out.println("2. List of Sent Messages");
+		System.out.println("3. View a Sent Message");
+		System.out.println("4. Delete Sent Message");
+		System.out.println("---------");
+		System.out.println("9. Return to Messenger Menu");
+
+		switch(esql.readChoice()){
+			case 1: SendMessage(esql, currentUser);
+					break;
+			case 2:
+					break;
+			case 3:
+					break;
+			case 4: DeleteMessage(esql, currentUser, "send");
+					break;
+			case 9:
+					break;
+			default: System.out.println("Invalid Choice. Please try again.");
+		}
+	}
+
+	public static void SendMessage(ProfNetwork esql, String currentUser){
+		try{
+			System.out.print("Please enter the userid of the user you want to send the message: ");
+			String receiveid = esql.in.readLine();
+			System.out.print("\nPlease enter the message you want to send: ");
+			String contents = esql.in.readLine();
+			try{
+				String query = String.format("INSERT INTO message (senderid, receiverid, contents, deletestatus, status) " + "VALUES('"+currentUser+"', '"+receiveid+"', '"+contents+"', 0, 'Delivered')");
+					esql.executeUpdate(query);
+			} catch (Exception e){
+				System.err.println(e.getMessage());
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
 	}
 
 	public static void DeleteMessage(ProfNetwork esql, String currentUser, String type){

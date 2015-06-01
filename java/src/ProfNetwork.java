@@ -397,7 +397,7 @@ public class ProfNetwork {
 	// query to print the friends list of the user
    public static void FriendList(ProfNetwork esql, String currentUser){
 	   try{
-			String query = String.format("SELECT connectionid FROM connection_usr WHERE userID = '%s' and status										= '%s' UNION SELECT userID FROM connection_usr WHERE connectionid = '%s' and status= '%s'", 
+			String query = String.format("SELECT connectionid FROM connection_usr WHERE userID = '%s' AND status										= '%s' OR connectionid = '%s' AND status= '%s'", 
 						   currentUser, "Accept", currentUser, "Accept");
 	   System.out.println("\nFriends List:");
 	   int result = esql.executeQueryAndPrintResult(query);
@@ -670,16 +670,42 @@ class Messenger{
 	}
 }
 
-class Connection{
+class UserConnect{
 	// for sending connection requests from connection menu, will prompt for input
-	public static SendNonProfileRequest(ProfNetwork esql, String currentUser){
+	public static void SendNonProfileRequest(ProfNetwork esql, String currentUser){
+		System.out.print("\nPlease enter the userid of the person you want to connect with: ");
+		try{
+			String userReq = esql.in.readLine();
+			if(ConnectionDepthCheck(esql, currentUser, userReq)){
+			} else {
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
 	}
 	
 	// for sending connection requests from profile view
-	public static SendProfileRequest(ProfNetwork esql, String currentUser, String userReq){
+	public static void SendProfileRequest(ProfNetwork esql, String currentUser, String userReq){
 	}
 
-	public static ConnectionDepthCheck(ProfNetwork, String currentUser, String userReq){
+	public static boolean ConnectionDepthCheck(ProfNetwork esql, String currentUser, String userReq){
+		boolean status = false;
+		List<List<String>> result = new ArrayList<List<String>>();
+		String query = String.format("SELECT count(*) FROM connection_usr WHERE userid = '%s' AND status = 'Accept' OR connectionid = '%s' AND status = 'Accept'", currentUser, currentUser);
+		// add check for 5 count of frieds and execute depth check only if count > 6 
+		try{
+			query = String.format("SELECT conn_request('%s', '%s')", currentUser, userReq);
+			result = esql.executeQueryAndReturnResult(query);
+			if(result.get(0).get(0).equals("t")){
+				status = true;
+			} else {
+				status = false;
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+			status = false;
+		}
+		return status;
 	}
 }
 

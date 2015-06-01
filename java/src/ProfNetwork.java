@@ -283,11 +283,13 @@ public class ProfNetwork {
                 System.out.println("9. Log out");
                 switch (readChoice()){
                    case 1: FriendList(esql, authorisedUser); break;
-                   case 2: UpdateProfile(esql); break;
+                   case 2: /*UpdateProfile(esql);*/ break;
                    case 3: Messenger menu = new Messenger();
 						   menu.MessageService(esql, authorisedUser); 
 						   break;
-                   case 4: SendRequest(esql); break;
+                   case 4: UserConnect req = new UserConnect(); 
+						   req.NonProfileRequest(esql, authorisedUser);
+						   break;
                    case 9: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
@@ -409,18 +411,6 @@ public class ProfNetwork {
 	   }
 
    }
-
-   public static void UpdateProfile(ProfNetwork esql){
-   }
-
-   public static void NewMessage(ProfNetwork esql){
-   }
-
-   public static void SendRequest(ProfNetwork esql){
-   }
-
-
-
 }//end ProfNetwork
 
 /********************************************************
@@ -586,6 +576,22 @@ class Messenger{
 			System.err.println(e.getMessage());
 		}
 	}
+	/* create triggers for setting deletestatus and status for inserting messages */
+	// for sending messages from viewing someones profile
+	public static void SendMessageProfile(ProfNetwork esql, String currentUser, String receiverId){
+		try{
+			System.out.print("Please enter the message you want to send: ");
+			String contents = esql.in.readLine();
+			try{
+				String query = String.format("INSERT INTO message (senderId, receiverId, contents, deletestatus, status) " + "VALUES('"+currentUser+"', '"+receiverId+"', '"+contents+"', 0, 'Delivered')");
+				esql.executeUpdate(query);
+			} catch (Exception e){
+				System.err.println(e.getMessage());
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
+	}
 
 	public static void ListSentMessages(ProfNetwork esql, String currentUser){
 		try{
@@ -670,14 +676,27 @@ class Messenger{
 	}
 }
 
+/**************************************************
+* UserConnect class
+* Programmer: Brandon Stevenson
+* Date: 5/29/2015
+* Purpose: Provides methods for sending connection
+*		   requests and checking if request is
+*		   in terms of connection depth.
+*
+**************************************************/
 class UserConnect{
 	// for sending connection requests from connection menu, will prompt for input
-	public static void SendNonProfileRequest(ProfNetwork esql, String currentUser){
+	public static void NonProfileRequest(ProfNetwork esql, String currentUser){
 		System.out.print("\nPlease enter the userid of the person you want to connect with: ");
 		try{
 			String userReq = esql.in.readLine();
 			if(ConnectionDepthCheck(esql, currentUser, userReq)){
+				// look into making a trigger that fills in the status part of connection_usr
+				String query = String.format("INSERT INTO connection_usr (userId, connectionId, status) " + "VALUES('"+currentUser+"', '"+userReq+"', 'Request')");
+				esql.executeUpdate(query);
 			} else {
+				System.out.println("Cannot send request to this user. They are not within a valid connection level.");
 			}
 		} catch (Exception e){
 			System.err.println(e.getMessage());
@@ -685,28 +704,50 @@ class UserConnect{
 	}
 	
 	// for sending connection requests from profile view
-	public static void SendProfileRequest(ProfNetwork esql, String currentUser, String userReq){
+	public static void ProfileRequest(ProfNetwork esql, String currentUser, String userReq){
+		if(ConnectionDepthCheck(esql, currentUser, userReq)){
+			System.out.println("Sending connection request to '"+userReq+"'");
+			String query = String.format("INSERT INTO connection_usr (userId, connectionId, status) " + "VALUES('"+currentUser+"', '"+userReq+"', 'Request'");
+			try{
+				esql.executeUpdate(query);
+			} catch (Exception e){
+				System.err.println(e.getMessage());
+			}
+		} else{
+			System.out.println("Cannot send a connection request to this user.");
+		}
 	}
 
 	public static boolean ConnectionDepthCheck(ProfNetwork esql, String currentUser, String userReq){
 		boolean status = false;
 		List<List<String>> result = new ArrayList<List<String>>();
 		String query = String.format("SELECT count(*) FROM connection_usr WHERE userid = '%s' AND status = 'Accept' OR connectionid = '%s' AND status = 'Accept'", currentUser, currentUser);
-		// add check for 5 count of frieds and execute depth check only if count > 6 
+		// add check for 5 count of friends and execute depth check only if count > 4
 		try{
-			query = String.format("SELECT conn_request('%s', '%s')", currentUser, userReq);
 			result = esql.executeQueryAndReturnResult(query);
-			if(result.get(0).get(0).equals("t")){
-				status = true;
+			int count = Integer.parseInt(result.get(0).get(0).trim());
+			if(count > 4){	
+				try{
+					query = String.format("SELECT conn_request('%s', '%s')", currentUser, userReq);
+					result = esql.executeQueryAndReturnResult(query);
+					if(result.get(0).get(0).equals("t")){
+						status = true;
+					} else {
+						status = false;
+					}
+				} catch (Exception e){
+					System.err.println(e.getMessage());
+					status = false;
+				}
 			} else {
-				status = false;
+				status = true;
 			}
 		} catch (Exception e){
-			System.err.println(e.getMessage());
 			status = false;
+			System.err.println(e.getMessage());
 		}
 		return status;
-	}
+		}
 }
 
 class Profiles{

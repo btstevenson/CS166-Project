@@ -544,7 +544,6 @@ class Messenger{
 
 	public static void SendMessageMenu(ProfNetwork esql, String currentUser){
 		boolean getChoice = true;
-<<<<<<< HEAD
 		while(getChoice){
 			System.out.println("\nSend Messages Menu");
 			System.out.println("---------");
@@ -568,29 +567,6 @@ class Messenger{
 						break;
 				default: System.out.println("Invalid Choice. Please try again.");
 			}
-=======
-		System.out.println("\nSend Messages Menu");
-		System.out.println("---------");
-		System.out.println("1. Send Message");
-		System.out.println("2. List of Sent Messages");
-		System.out.println("3. View a Sent Message");
-		System.out.println("4. Delete Sent Message");
-		System.out.println("---------");
-		System.out.println("9. Return to Messenger Menu");
-
-		switch(esql.readChoice()){
-			case 1: SendMessage(esql, currentUser);
-					break;
-			case 2:
-					break;
-			case 3:
-					break;
-			case 4: DeleteMessage(esql, currentUser, "send");
-					break;
-			case 9:
-					break;
-			default: System.out.println("Invalid Choice. Please try again.");
->>>>>>> b86ea5bca21c2acecd0d20ea5cb1ae5173944612
 		}
 	}
 
@@ -609,7 +585,6 @@ class Messenger{
 		} catch (Exception e){
 			System.err.println(e.getMessage());
 		}
-<<<<<<< HEAD
 	}
 
 	public static void ListSentMessages(ProfNetwork esql, String currentUser){
@@ -646,8 +621,6 @@ class Messenger{
 		} catch (Exception e){
 			System.err.println(e.getMessage());
 		}
-=======
->>>>>>> b86ea5bca21c2acecd0d20ea5cb1ae5173944612
 	}
 
 	public static void DeleteMessage(ProfNetwork esql, String currentUser, String type){
@@ -695,4 +668,20 @@ class Messenger{
 			System.err.println(e.getMessage());
 		}
 	}
+}
+
+class Connection{
+	// for sending connection requests from connection menu, will prompt for input
+	public static SendNonProfileRequest(ProfNetwork esql, String currentUser){
+	}
+	
+	// for sending connection requests from profile view
+	public static SendProfileRequest(ProfNetwork esql, String currentUser, String userReq){
+	}
+
+	public static ConnectionDepthCheck(ProfNetwork, String currentUser, String userReq){
+	}
+}
+
+class Profiles{
 }

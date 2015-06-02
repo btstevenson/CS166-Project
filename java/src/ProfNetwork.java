@@ -406,7 +406,7 @@ public class ProfNetwork {
 						   currentUser, "Accept", currentUser, "Accept");
 	   System.out.println("\nFriends List:");
 	   int result = esql.executeQueryAndPrintResult(query);
-	   if(result == 0){
+	   if(result < 1){
 			System.out.println("You currently do not have any friends. Try sending connection requests.\n");
 	   }
 	   }catch(Exception e){

@@ -399,7 +399,7 @@ public class ProfNetwork {
 	// query to print the friends list of the user
    public static void FriendList(ProfNetwork esql, String currentUser){
 	   try{
-			String query = String.format("SELECT connectionid FROM connection_usr WHERE userID = '%s' AND status										= '%s' OR connectionid = '%s' AND status= '%s'", 
+			String query = String.format("SELECT connectionid FROM connection_usr WHERE userID = '%s' AND status										= '%s' UNION SELECT userid FROM connection_usr WHERE connectionid = '%s' AND status= '%s'", 
 						   currentUser, "Accept", currentUser, "Accept");
 	   System.out.println("\nFriends List:");
 	   int result = esql.executeQueryAndPrintResult(query);
@@ -696,7 +696,7 @@ class UserConnect{
 				String query = String.format("INSERT INTO connection_usr (userId, connectionId, status) " + "VALUES('"+currentUser+"', '"+userReq+"', 'Request')");
 				esql.executeUpdate(query);
 			} else {
-				System.out.println("Cannot send request to this user. They are not within a valid connection level.");
+				System.out.println("\nCannot send request to this user. They are not within a valid connection level.");
 			}
 		} catch (Exception e){
 			System.err.println(e.getMessage());
@@ -728,7 +728,7 @@ class UserConnect{
 			int count = Integer.parseInt(result.get(0).get(0).trim());
 			if(count > 4){	
 				try{
-					query = String.format("SELECT conn_request('%s', '%s')", currentUser, userReq);
+					query = String.format("SELECT conn_search('"+currentUser+"', '"+userReq+"')");
 					result = esql.executeQueryAndReturnResult(query);
 					if(result.get(0).get(0).equals("t")){
 						status = true;

@@ -278,7 +278,8 @@ public class ProfNetwork {
                 System.out.println("1. Goto Friend List");
                 System.out.println("2. Update Profile");
                 System.out.println("3. Messages");
-                System.out.println("4. Send Friend Request");
+                System.out.println("4. Connections");
+				System.out.println("5. Search");
                 System.out.println(".........................");
                 System.out.println("9. Log out");
                 switch (readChoice()){
@@ -287,9 +288,11 @@ public class ProfNetwork {
                    case 3: Messenger menu = new Messenger();
 						   menu.MessageService(esql, authorisedUser); 
 						   break;
-                   case 4: UserConnect req = new UserConnect(); 
-						   req.NonProfileRequest(esql, authorisedUser);
+                   case 4: UserConnect conn = new UserConnect(); 
+						   conn.ConnectMenu(esql, authorisedUser);
 						   break;
+				   case 5:
+							break;
                    case 9: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
@@ -504,7 +507,7 @@ class Messenger{
 			}
 		}
 	}
-	
+	/* allows user to read recieved message */	
 	public static void ReadMessage(ProfNetwork esql, String currentUser){
 		System.out.print("\t\nPlease enter the message id you would like to read: ");
 		try{
@@ -559,7 +562,7 @@ class Messenger{
 			}
 		}
 	}
-
+	/* allows user to send a message to another user */
 	public static void SendMessage(ProfNetwork esql, String currentUser){
 		try{
 			System.out.print("Please enter the userid of the user you want to send the message: ");
@@ -592,7 +595,7 @@ class Messenger{
 			System.err.println(e.getMessage());
 		}
 	}
-
+    /* lists all sent mesages */
 	public static void ListSentMessages(ProfNetwork esql, String currentUser){
 		try{
 			String query = String.format("Select msgid, receiverid, status FROM message WHERE senderid = '%s' AND (deletestatus = '0' OR deletestatus = '2')", currentUser);
@@ -604,7 +607,7 @@ class Messenger{
 			System.err.println(e.getMessage());
 		}
 	}
-
+	/* allows user to view a sent message */
 	public static void ViewSentMessage(ProfNetwork esql, String currentUser){
 		try{
 			System.out.print("Please enter the message id you want to view: ");
@@ -628,7 +631,9 @@ class Messenger{
 			System.err.println(e.getMessage());
 		}
 	}
-
+	/* deletes a message by prompting a user what msg they want to delete. might be a better 
+	   approach to print out the numbers and have them choose just based off the number and not
+	   msgid*/
 	public static void DeleteMessage(ProfNetwork esql, String currentUser, String type){
 		System.out.print("Please enter the message id that you would like to delete: ");
 		try{
@@ -686,6 +691,58 @@ class Messenger{
 *
 **************************************************/
 class UserConnect{
+	//display the connection menu allowing user to accept/decline or send requests
+	public static void ConnectMenu(ProfNetwork esql, String currentUser){
+		boolean getChoice = true;
+		while(getChoice){
+			System.out.println("\nConnection Menu");
+			System.out.println("1. Accept/Decline Requests");
+			System.out.println("2. Send Connection Request");
+			System.out.println("---------");
+			System.out.println("9. Return to main menu");
+				
+			switch(esql.readChoice()){
+				case 1: ViewRequest(esql, currentUser);
+						break;
+				case 2: NonProfileRequest(esql, currentUser);break;
+				case 9: getChoice = false; break;
+				default: System.out.println("Invalid choice. Please try again.");
+			}
+		}
+	}
+	//lists pending requests and allows user to accept or decline by using a menu
+	public static void ViewRequest(ProfNetwork esql, String currentUser){
+		List<List<String>> result = new ArrayList<List<String>>();
+		try{
+			String query = String.format("SELECT userid FROM connection_usr WHERE connectionid = '"+currentUser+"'");
+			System.out.println("Connection Requests: ");
+			result = esql.executeQueryAndReturnResult(query);
+			if(result.isEmpty()){
+				System.out.println("There are no pending connection requests.");
+			} else{
+				boolean getChoice = true;
+				while(getChoice){
+					System.out.println("1. Accept request");
+					System.out.println("2. Reject request");
+					System.out.println("---------");
+					System.out.println("9. Return to Connection Menu");
+					/*look into copyonwritearray in order to update the remaining connection requests 
+					  so as the user accepts or rejects requests the list is updated and then displayed 
+					  again*/
+					switch(esql.readChoice()){
+						case 1: break;
+						case 2: break;
+						case 9: getChoice = false;
+						default: System.out.println("Invalid choice. Please try again.");
+					}
+				}
+			}
+					
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
+	}
+
 	// for sending connection requests from connection menu, will prompt for input
 	public static void NonProfileRequest(ProfNetwork esql, String currentUser){
 		System.out.print("\nPlease enter the userid of the person you want to connect with: ");
@@ -717,7 +774,9 @@ class UserConnect{
 			System.out.println("Cannot send a connection request to this user.");
 		}
 	}
-
+	/*this will need to modified later in order to better suit the rest of the project
+	  the stored procedure should create a view that holds all connection possibilites for the user
+	  allowing for a quick check when viewing profiles if the connection option should be allowed */
 	public static boolean ConnectionDepthCheck(ProfNetwork esql, String currentUser, String userReq){
 		boolean status = false;
 		List<List<String>> result = new ArrayList<List<String>>();

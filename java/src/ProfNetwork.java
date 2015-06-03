@@ -714,27 +714,59 @@ class UserConnect{
 	public static void ViewRequest(ProfNetwork esql, String currentUser){
 		List<List<String>> result = new ArrayList<List<String>>();
 		try{
-			String query = String.format("SELECT userid FROM connection_usr WHERE connectionid = '"+currentUser+"'");
-			System.out.println("Connection Requests: ");
+			String query = String.format("SELECT userid FROM connection_usr WHERE connectionid = '"+currentUser+"' AND status = 'Request'");		
 			result = esql.executeQueryAndReturnResult(query);
 			if(result.isEmpty()){
 				System.out.println("There are no pending connection requests.");
 			} else{
+				/* gives an interactive menu for the user to accept/reject requests from */
 				boolean getChoice = true;
-				while(getChoice){
-					System.out.println("1. Accept request");
+				while(!result.isEmpty() && getChoice){
+					int count = 1;
+					System.out.println("Connection Requests: ");
+					for(int i = 0; i < result.size(); i++){
+						System.out.println(""+count+". " + ""+result.get(i).get(0)+"");
+						count++;
+					}
+					System.out.println("\n1. Accept request");
 					System.out.println("2. Reject request");
 					System.out.println("---------");
 					System.out.println("9. Return to Connection Menu");
-					/*look into copyonwritearray in order to update the remaining connection requests 
-					  so as the user accepts or rejects requests the list is updated and then displayed 
-					  again*/
+
+					int reqChoice = 0;
 					switch(esql.readChoice()){
-						case 1: break;
-						case 2: break;
-						case 9: getChoice = false;
+						case 1: System.out.print("Please enter the number of the request to accept: ");
+								try{
+									reqChoice = Integer.parseInt(esql.in.readLine().trim()) - 1;
+									query = String.format("UPDATE connection_usr SET status = 'Accept' WHERE userid = '"+result.get(reqChoice).get(0)+"' AND connectionid = '"+currentUser+"'");
+									try{
+										esql.executeUpdate(query);
+										result.remove(reqChoice);
+									} catch (Exception e){
+										System.err.println(e.getMessage());
+									}
+								} catch (Exception e){
+									System.err.println(e.getMessage());
+								}
+								break;
+						case 2: System.out.print("Please enter the number of the request to reject: ");
+								try{
+									reqChoice = Integer.parseInt(esql.in.readLine().trim()) - 1;
+									query = String.format("UPDATE connection_usr SET status = 'Reject' WHERE userid = '"+result.get(reqChoice).get(0)+"' AND connectionid = '"+currentUser+"'");
+									try{
+										esql.executeUpdate(query);
+										result.remove(reqChoice);
+									} catch (Exception e){
+										System.err.println(e.getMessage());
+									}
+								} catch (Exception e){
+									System.err.println(e.getMessage());
+								}
+								break;
+						case 9: getChoice = false; break;
 						default: System.out.println("Invalid choice. Please try again.");
 					}
+					System.out.println();	
 				}
 			}
 					

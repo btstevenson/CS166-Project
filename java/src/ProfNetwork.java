@@ -347,6 +347,7 @@ public class ProfNetwork {
     * Creates a new user with privided login, passowrd and phoneNum
     * An empty block and contact list would be generated and associated with a user
     **/
+   // need to add additional options for other details although these are not required
    public static void CreateUser(ProfNetwork esql){
       try{
          System.out.print("\tEnter user login: ");
@@ -400,6 +401,8 @@ public class ProfNetwork {
 // Rest of the functions definition go in here
 
 	// query to print the friends list of the user
+	// move to connections to allow for a submenu to view the friends profile
+	// this will be similar to how connections accept/reject is done
    public static void FriendList(ProfNetwork esql, String currentUser){
 	   try{
 			String query = String.format("SELECT connectionid FROM connection_usr WHERE userID = '%s' AND status										= '%s' UNION SELECT userid FROM connection_usr WHERE connectionid = '%s' AND status= '%s'", 
@@ -842,4 +845,36 @@ class UserConnect{
 }
 
 class Profiles{
+	Messenger msg = new Messenger(); // local global for accessing messenger methods
+	UserConnect conn = new UserConnect(); // local global for accessing userconnect methods
+	// for listing the current users profile to them
+	public static void UserProfileView(ProfNetwork esql, String currentUser){
+	}
+	
+	// for displaying user profiles, will have check to see if connection or not
+	public static void ViewUserProfile(ProfNetwork esql, String currentUser, String usrName){
+	}
+	
+	// allows to search any user
+	public static void SearchProfile(ProfNetwork esql){
+	}
+
+	public static void AddWorkExp(ProfNetwork esql, String currentUser){
+	}
+
+	public static void UpdateWorkExp(ProfNetwork esql, String currentUser){
+	}
+
+	public static void AddSchool(ProfNetwork esql, String currentUser){
+	}
+
+	public static void UpdateSchool(ProfNetwork esql, String currentUser){
+	}
+	
+	// no limit how far but to send connection will only be available to valid users
+	public static void ViewUserFriends(ProfNetwork esql, String usrName){
+	}
+
+	public static void UpdatePassword(ProfNetwork esql, String currentUser){
+	}
 }

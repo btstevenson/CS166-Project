@@ -10,7 +10,7 @@ CREATE TABLE USR(
 	password varchar(20) NOT NULL,
 	email text NOT NULL,
 	name varchar(50),
-	dateOfBirth date,
+	date_of_birth date,
 	Primary Key(userId));
 
 CREATE TABLE WORK_EXPR(
@@ -18,18 +18,18 @@ CREATE TABLE WORK_EXPR(
 	company varchar(50) NOT NULL, 
 	role varchar(50) NOT NULL,
 	location varchar(50),
-	startDate date,
-	endDate date,
-	PRIMARY KEY(userId,company,role,startDate),
+	start_date date,
+	end_date date,
+	PRIMARY KEY(userId,company,role,start_date),
 	FOREIGN KEY(userId) REFERENCES USR);
 
 CREATE TABLE EDUCATIONAL_DETAILS(
 	userId varchar(50) NOT NULL, 
-	instituitionName varchar(50) NOT NULL, 
+	institution_name varchar(50) NOT NULL, 
 	major varchar(50) NOT NULL,
 	degree varchar(50) NOT NULL,
-	startdate date,
-	enddate date,
+	start_date date,
+	end_date date,
 	PRIMARY KEY(userId,major,degree),
 	FOREIGN KEY(userId) REFERENCES USR);
 
@@ -38,8 +38,8 @@ CREATE TABLE MESSAGE(
 	senderId varchar(50) NOT NULL,
 	receiverId varchar(50) NOT NULL,
 	contents varchar(500) NOT NULL,
-	sendTime timestamp,
-	deleteStatus integer,
+	send_time timestamp,
+	delete_status integer,
 	status varchar(30) NOT NULL);
 
 CREATE TABLE CONNECTION_USR(

@@ -272,8 +272,10 @@ public class ProfNetwork {
             }//end switch
             if (authorisedUser != null) {
               boolean usermenu = true;
+			  Profile prof = new Profile();
+			  prof.GetCurrProfile(esql, authorisedUser);
               while(usermenu) {
-                System.out.println("MAIN MENU");
+                System.out.println("\nMAIN MENU");
                 System.out.println("---------");
                 System.out.println("1. Goto Friend List");
                 System.out.println("2. Update Profile");
@@ -480,7 +482,7 @@ class Messenger{
 
 			switch(esql.readChoice()){
 				case 1: try{
-							String query = String.format("SELECT msgid, senderid FROM message WHERE receiverid = '%s' AND status = '%s' AND (deletestatus = '0' OR deletestatus = '1')", currentUser, "Delivered");
+							String query = String.format("SELECT msgid, senderid FROM message WHERE receiverid = '%s' AND status = '%s' AND (delete_status = '0' OR delete_status = '1')", currentUser, "Delivered");
 
 							int result = esql.executeQueryAndPrintResult(query);
 							if(result < 1){
@@ -493,7 +495,7 @@ class Messenger{
 				case 2: ReadMessage(esql, currentUser);	 
 						break;
 				case 3: try{
-							String query = String.format("SELECT msgid,senderid FROM message WHERE receiverid = '%s' AND (status = '%s' OR status = '%s') AND (deletestatus = '0' OR deletestatus ='1')", currentUser, "Delivered", "Read");
+							String query = String.format("SELECT msgid,senderid FROM message WHERE receiverid = '%s' AND (status = '%s' OR status = '%s') AND (delete_status = '0' OR delete_status ='1')", currentUser, "Delivered", "Read");
 							int result = esql.executeQueryAndPrintResult(query);
 							if(result < 1){
 								System.out.println("There are no messages in your inbox.");
@@ -518,7 +520,7 @@ class Messenger{
 			int msgid = Integer.parseInt(input.trim());
 			try{
 				System.out.println();
-				String query = String.format("SELECT contents FROM message WHERE msgid = '%s' AND (deletestatus = '0' OR deletestatus = '1')", msgid);
+				String query = String.format("SELECT contents FROM message WHERE msgid = '%s' AND (delete_status = '0' OR delete_status = '1')", msgid);
 				int result = esql.executeQueryAndPrintResult(query);
 				if(result < 1){
 					System.out.println("No message found with that id. Please try again.");
@@ -573,7 +575,7 @@ class Messenger{
 			System.out.print("\nPlease enter the message you want to send: ");
 			String contents = esql.in.readLine();
 			try{
-				String query = String.format("INSERT INTO message (senderid, receiverid, contents, deletestatus, status) " + "VALUES('"+currentUser+"', '"+receiveid+"', '"+contents+"', 0, 'Delivered')");
+				String query = String.format("INSERT INTO message (senderid, receiverid, contents, delete_status, status) " + "VALUES('"+currentUser+"', '"+receiveid+"', '"+contents+"', 0, 'Delivered')");
 					esql.executeUpdate(query);
 			} catch (Exception e){
 				System.err.println(e.getMessage());
@@ -582,14 +584,14 @@ class Messenger{
 			System.err.println(e.getMessage());
 		}
 	}
-	/* create triggers for setting deletestatus and status for inserting messages */
+	/* create triggers for setting delete_status and status for inserting messages */
 	// for sending messages from viewing someones profile
 	public static void SendMessageProfile(ProfNetwork esql, String currentUser, String receiverId){
 		try{
 			System.out.print("Please enter the message you want to send: ");
 			String contents = esql.in.readLine();
 			try{
-				String query = String.format("INSERT INTO message (senderId, receiverId, contents, deletestatus, status) " + "VALUES('"+currentUser+"', '"+receiverId+"', '"+contents+"', 0, 'Delivered')");
+				String query = String.format("INSERT INTO message (senderId, receiverId, contents, delete_status, status) " + "VALUES('"+currentUser+"', '"+receiverId+"', '"+contents+"', 0, 'Delivered')");
 				esql.executeUpdate(query);
 			} catch (Exception e){
 				System.err.println(e.getMessage());
@@ -601,7 +603,7 @@ class Messenger{
     /* lists all sent mesages */
 	public static void ListSentMessages(ProfNetwork esql, String currentUser){
 		try{
-			String query = String.format("Select msgid, receiverid, status FROM message WHERE senderid = '%s' AND (deletestatus = '0' OR deletestatus = '2')", currentUser);
+			String query = String.format("Select msgid, receiverid, status FROM message WHERE senderid = '%s' AND (delete_status = '0' OR delete_status = '2')", currentUser);
 			int result = esql.executeQueryAndPrintResult(query);
 			if(result < 1){
 				System.out.println("You have no sent messages.");
@@ -644,12 +646,12 @@ class Messenger{
 			int msgid = Integer.parseInt(input.trim());
 			try{
 				if(type.equals("send")){
-					String query = String.format("SELECT deletestatus FROM message WHERE msgid = '%s' AND senderid = '%s'", msgid, currentUser);
+					String query = String.format("SELECT delete_status FROM message WHERE msgid = '%s' AND senderid = '%s'", msgid, currentUser);
 					List<List<String>> result = new ArrayList<List<String>>();
 					result = esql.executeQueryAndReturnResult(query);
 					try{
 						if(result.get(0).get(0).equals("0")){
-							query = String.format("UPDATE message set deletestatus = '1' WHERE msgid = '%s'", msgid);
+							query = String.format("UPDATE message set delete_status = '1' WHERE msgid = '%s'", msgid);
 							esql.executeUpdate(query);
 						} else{
 							query = String.format("DELETE FROM message WHERE msgid = '%s'", msgid);
@@ -659,13 +661,13 @@ class Messenger{
 						System.err.println(e.getMessage());
 					}
 				} else {
-					String query = String.format("SELECT deletestatus FROM message WHERE msgid = '%s' AND receiverid = '%s'", msgid, currentUser);
+					String query = String.format("SELECT delete_status FROM message WHERE msgid = '%s' AND receiverid = '%s'", msgid, currentUser);
 					List<List<String>> result = new ArrayList<List<String>>();
 					result = esql.executeQueryAndReturnResult(query);
 					try{
 						if(result.get(0).get(0).equals("0")){
 				
-							query = String.format("UPDATE message SET deletestatus = '2' WHERE msgid = '%s'", msgid);
+							query = String.format("UPDATE message SET delete_status = '2' WHERE msgid = '%s'", msgid);
 							esql.executeUpdate(query);
 						} else{
 							query = String.format("DELETE FROM message WHERE msgid = '%s'", msgid);
@@ -844,11 +846,69 @@ class UserConnect{
 		}
 }
 
-class Profiles{
-	Messenger msg = new Messenger(); // local global for accessing messenger methods
-	UserConnect conn = new UserConnect(); // local global for accessing userconnect methods
+class Profile{
+	//Messenger msg = new Messenger(); // local global for accessing messenger methods
+	//UserConnect conn = new UserConnect(); // local global for accessing userconnect methods
 	// for listing the current users profile to them
-	public static void UserProfileView(ProfNetwork esql, String currentUser){
+	public static void GetCurrProfile(ProfNetwork esql, String currentUser){
+		String query = String.format("SELECT name, email, date_of_birth FROM usr WHERE userid = '"+currentUser+"'");
+		List<List<String>> result = new ArrayList<List<String>>();
+		try{
+			result =  esql.executeQueryAndReturnResult(query);
+			System.out.println("Name: "+result.get(0).get(0)+"");
+			System.out.println("Email: "+result.get(0).get(1)+"");
+			System.out.println("Date of Birth: "+result.get(0).get(2)+"");
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
+		result.clear();
+		query = String.format("SELECT company, role, location, start_date, end_date FROM work_expr WHERE userid = '"+currentUser+"'");
+		int count = 1;
+		try{
+			// prints out work details
+			System.out.println("Work Experience: ");
+			result = esql.executeQueryAndReturnResult(query);
+			if(result.isEmpty()){
+				System.out.println("None");
+			} else{
+				for(int i = 0; i < result.size(); i++){
+					System.out.print("\t "+count+". ");
+					for(int j = 0; j < result.get(i).size(); j++){	
+						System.out.print(""+result.get(i).get(j)+"");
+						System.out.print(" ");
+					}
+					System.out.println();
+					count++;
+				}
+				System.out.println();
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
+		count = 1;
+		result.clear();
+		query = String.format("SELECT institution_name, major, degree, start_date, end_date FROM educational_details WHERE userid = '"+currentUser+"'");
+		try{
+			// prints out education details
+			System.out.println("Education: ");
+			result = esql.executeQueryAndReturnResult(query);
+			if(result.isEmpty()){
+				System.out.println("None");
+			} else{
+				for(int i = 0; i < result.size(); i++){
+					System.out.print("\t "+count+". "); 
+					for(int j = 0; j < result.get(i).size(); j++){
+						System.out.print(""+result.get(i).get(j)+"");
+						System.out.print(" ");
+					}
+					count++;
+					System.out.println();
+				}
+				System.out.println();
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
 	}
 	
 	// for displaying user profiles, will have check to see if connection or not

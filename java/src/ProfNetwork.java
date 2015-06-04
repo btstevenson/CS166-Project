@@ -245,6 +245,9 @@ public class ProfNetwork {
 
       Greeting();
       ProfNetwork esql = null;
+	  Profile prof = new Profile();
+	  Messenger menu = new Messenger();
+	  UserConnect conn = new UserConnect();
       try{
          // use postgres JDBC driver.
          Class.forName ("org.postgresql.Driver").newInstance ();
@@ -272,29 +275,21 @@ public class ProfNetwork {
             }//end switch
             if (authorisedUser != null) {
               boolean usermenu = true;
-			  Profile prof = new Profile();
 			  prof.GetCurrProfile(esql, authorisedUser);
               while(usermenu) {
                 System.out.println("\nMAIN MENU");
                 System.out.println("---------");
-                System.out.println("1. Goto Friend List");
-                System.out.println("2. Update Profile");
-                System.out.println("3. Messages");
-                System.out.println("4. Connections");
-				System.out.println("5. Search");
+                System.out.println("1. Profile Menu");
+                System.out.println("2. Messages Menu");
+                System.out.println("3. Connections Menu");
+				System.out.println("4. Search");
                 System.out.println(".........................");
                 System.out.println("9. Log out");
                 switch (readChoice()){
-                   case 1: FriendList(esql, authorisedUser); break;
-                   case 2: /*UpdateProfile(esql);*/ break;
-                   case 3: Messenger menu = new Messenger();
-						   menu.MessageService(esql, authorisedUser); 
-						   break;
-                   case 4: UserConnect conn = new UserConnect(); 
-						   conn.ConnectMenu(esql, authorisedUser);
-						   break;
-				   case 5:
-							break;
+                   case 1: prof.ProfileMenu(esql, authorisedUser); break;
+                   case 2: menu.MessageService(esql, authorisedUser); break;
+                   case 3: conn.ConnectMenu(esql, authorisedUser); break;
+				   case 4: conn.Search(esql); break;
                    case 9: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
@@ -400,25 +395,6 @@ public class ProfNetwork {
       }
    }//end
 
-// Rest of the functions definition go in here
-
-	// query to print the friends list of the user
-	// move to connections to allow for a submenu to view the friends profile
-	// this will be similar to how connections accept/reject is done
-   public static void FriendList(ProfNetwork esql, String currentUser){
-	   try{
-			String query = String.format("SELECT connectionid FROM connection_usr WHERE userID = '%s' AND status										= '%s' UNION SELECT userid FROM connection_usr WHERE connectionid = '%s' AND status= '%s'", 
-						   currentUser, "Accept", currentUser, "Accept");
-	   System.out.println("\nFriends List:");
-	   int result = esql.executeQueryAndPrintResult(query);
-	   if(result < 1){
-			System.out.println("You currently do not have any friends. Try sending connection requests.\n");
-	   }
-	   }catch(Exception e){
-		   System.err.println (e.getMessage());
-	   }
-
-   }
 }//end ProfNetwork
 
 /********************************************************
@@ -539,7 +515,7 @@ class Messenger{
 			System.out.println("Invalid input. The message id is an integer. Please try again");
 		}
 	}
-
+	// maybe add a search option so a user can message anyone on network from here
 	public static void SendMessageMenu(ProfNetwork esql, String currentUser){
 		boolean getChoice = true;
 		while(getChoice){
@@ -603,7 +579,7 @@ class Messenger{
     /* lists all sent mesages */
 	public static void ListSentMessages(ProfNetwork esql, String currentUser){
 		try{
-			String query = String.format("Select msgid, receiverid, status FROM message WHERE senderid = '%s' AND (delete_status = '0' OR delete_status = '2')", currentUser);
+			String query = String.format("SELECT msgid, receiverid, status FROM message WHERE senderid = '%s' AND (delete_status = '0' OR delete_status = '2')", currentUser);
 			int result = esql.executeQueryAndPrintResult(query);
 			if(result < 1){
 				System.out.println("You have no sent messages.");
@@ -684,7 +660,7 @@ class Messenger{
 			System.err.println(e.getMessage());
 		}
 	}
-}
+} // end Messenger
 
 /**************************************************
 * UserConnect class
@@ -701,20 +677,39 @@ class UserConnect{
 		boolean getChoice = true;
 		while(getChoice){
 			System.out.println("\nConnection Menu");
-			System.out.println("1. Accept/Decline Requests");
-			System.out.println("2. Send Connection Request");
+			System.out.println("1. View Connection List");
+			System.out.println("2. Accept/Decline Requests");
+			System.out.println("3. Send Connection Request");
 			System.out.println("---------");
 			System.out.println("9. Return to main menu");
 				
 			switch(esql.readChoice()){
-				case 1: ViewRequest(esql, currentUser);
-						break;
-				case 2: NonProfileRequest(esql, currentUser);break;
+				case 1: ConnectionList(esql, currentUser); break;
+				case 2: ViewRequest(esql, currentUser); break;
+				case 3: NonProfileRequest(esql, currentUser); break;
 				case 9: getChoice = false; break;
 				default: System.out.println("Invalid choice. Please try again.");
 			}
 		}
 	}
+	// displays connections of user
+	// need to add menu to be able to view a friends profile
+	// list the friends by number so user can select which one to view
+	public static void ConnectionList(ProfNetwork esql, String currentUser){
+	   try{
+			String query = String.format("SELECT connectionid FROM connection_usr WHERE userID = '%s' AND status										= '%s' UNION SELECT userid FROM connection_usr WHERE connectionid = '%s' AND status= '%s'", 
+						   currentUser, "Accept", currentUser, "Accept");
+	   System.out.println("\nFriends List:");
+	   int result = esql.executeQueryAndPrintResult(query);
+	   if(result < 1){
+			System.out.println("You currently do not have any friends. Try sending connection requests.\n");
+	   }
+	   }catch(Exception e){
+		   System.err.println (e.getMessage());
+	   }
+
+   }
+
 	//lists pending requests and allows user to accept or decline by using a menu
 	public static void ViewRequest(ProfNetwork esql, String currentUser){
 		List<List<String>> result = new ArrayList<List<String>>();
@@ -843,12 +838,94 @@ class UserConnect{
 			System.err.println(e.getMessage());
 		}
 		return status;
+	}
+	
+	// might need to add user paramater
+	// will need to be updated to check for connection status or not
+	// maybe create procedue to return partial matches of name
+	public static void Search(ProfNetwork esql){
+		List<List<String>> result = new ArrayList<List<String>>();
+		try{
+			System.out.print("Please enter the first name of user: ");
+			String firstName = esql.in.readLine();
+			try{
+				System.out.print("Please enter the last name of user: ");
+				String lastName = esql.in.readLine();
+				String fullName = ""+firstName+" " + lastName;
+				boolean getName = true;
+				System.out.print("Search Results: ");
+				String query = String.format("SELECT name FROM usr WHERE name = '"+fullName+"'");
+				try{
+					result = esql.executeQueryAndReturnResult(query);
+					if(result.isEmpty()){
+						System.out.println("No results");
+					} else{
+						int count = 1;
+						for(int i = 0; i < result.size(); i++){
+							//for now will not need inner loop
+							//if selecting more will need to add inner loop
+							System.out.println("\n\t"+count+". " + ""+result.get(i).get(0)+"");
+							count++;
+						}
+					}
+				} catch (Exception e){
+					System.err.println(e.getMessage());
+				}
+				System.out.println("\n1. View Profile");
+				System.out.println("2. Send Message");
+				System.out.println("3. Search Again");
+				System.out.println("---------");
+				System.out.println("9. Return to Main Menu");
+				switch(esql.readChoice()){
+					case 1: break;
+					case 2: break;
+					case 3: Search(esql); break;
+					case 4: break;
+				}
+			} catch (Exception e){
+				System.err.println(e.getMessage());
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
 		}
-}
+	}
+	
+} // end UserConnect
 
 class Profile{
-	//Messenger msg = new Messenger(); // local global for accessing messenger methods
-	//UserConnect conn = new UserConnect(); // local global for accessing userconnect methods
+	Messenger msg = new Messenger(); // local global for accessing messenger methods
+	UserConnect conn = new UserConnect(); // local global for accessing userconnect methods
+	
+	public static void ProfileMenu(ProfNetwork esql, String currentUser){
+		boolean getChoice = true;
+		while(getChoice){
+			System.out.println("Profile Menu");
+			System.out.println("1. View Connection List");
+			System.out.println("2. Change password");
+			System.out.println("3. Add Work Experience");
+			System.out.println("4. Update Work Experience");
+			System.out.println("5. Delete Work Experience");
+			System.out.println("6. Add Education Details");
+			System.out.println("7. Update Work Experience");
+			System.out.println("8. Remove Education Details");
+			System.out.println("---------");
+			System.out.println("10. Return to Main Menu");
+
+			switch(esql.readChoice()){
+				case 1: break;
+				case 2: break;
+				case 3: break;
+				case 4: break;
+				case 5: break;
+				case 6: break;
+				case 7: break;
+				case 8: break;
+				case 10: getChoice = false; break;
+				default: System.out.println("Invalid input. Please try again.");
+			}
+		}
+	}
+
 	// for listing the current users profile to them
 	public static void GetCurrProfile(ProfNetwork esql, String currentUser){
 		String query = String.format("SELECT name, email, date_of_birth FROM usr WHERE userid = '"+currentUser+"'");
@@ -925,10 +1002,16 @@ class Profile{
 	public static void UpdateWorkExp(ProfNetwork esql, String currentUser){
 	}
 
+	public static void DeleteWorkExp(ProfNetwork esql, String currentUser){
+	}
+
 	public static void AddSchool(ProfNetwork esql, String currentUser){
 	}
 
 	public static void UpdateSchool(ProfNetwork esql, String currentUser){
+	}
+
+	public static void DeleteSchool(ProfNetwork esql, String currentUser){
 	}
 	
 	// no limit how far but to send connection will only be available to valid users
@@ -937,4 +1020,4 @@ class Profile{
 
 	public static void UpdatePassword(ProfNetwork esql, String currentUser){
 	}
-}
+} //end Profile

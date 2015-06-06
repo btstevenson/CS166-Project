@@ -913,7 +913,7 @@ class Profile{
 
 			switch(esql.readChoice()){
 				case 1: break;
-				case 2: break;
+				case 2: UpdatePassword(esql,currentUser); break;
 				case 3: break;
 				case 4: break;
 				case 5: break;
@@ -1019,5 +1019,15 @@ class Profile{
 	}
 
 	public static void UpdatePassword(ProfNetwork esql, String currentUser){
-	}
+		//BRANDON DO YOU THINK THIS WILL WORK?
+	/*	List<List<String>> result = new ArrayList<List<String>>();
+		String query = String.format("UPDATE usr set password = '%s' WHERE userid = '"+currentUser+"'",password);
+		try{
+			System.out.print("\tEnter new password: ");
+         		String password = in.readLine();
+			result = esql.executeUpdate(query);
+	}catch (Exception e){
+			System.err.println(e.getMessage());
+		}*/
+
 } //end Profile

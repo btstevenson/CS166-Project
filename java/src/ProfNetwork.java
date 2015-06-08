@@ -845,7 +845,7 @@ class UserConnect{
 	public static void ProfileRequest(ProfNetwork esql, String currentUser, String userReq){
 		if(ConnectionDepthCheck(esql, currentUser, userReq)){
 			System.out.println("Sending connection request to '"+userReq+"'");
-			String query = String.format("INSERT INTO connection_usr (userId, connectionId, status) " + "VALUES('"+currentUser+"', '"+userReq+"', 'Request'");
+			String query = String.format("INSERT INTO connection_usr (userId, connectionId, status) " + "VALUES('"+currentUser+"', '"+userReq+"', 'Request')");
 			try{
 				esql.executeUpdate(query);
 			} catch (Exception e){

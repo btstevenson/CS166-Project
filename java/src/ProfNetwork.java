@@ -1041,18 +1041,27 @@ class Profile{
 			}
 			else{
 				boolean keepon = true;
+				System.out.println("\tEnter the company name of the entry you wish to update");
+				companyName = esql.in.readLine();
+				System.out.println("\tEnter the role of the entry you wish to update");
+				userRole = esql.in.readLine();
+				System.out.println("\tEnter the start date of the entry you wish to update");
+				startDate = esql.in.readLine();
+
 				while (keepon){
+					
+
 					System.out.println("UPDATE WORK EXPERIENCE");
 					System.out.println("----------");
-					System.out.println("1. Update Company Name");
-					System.out.println("2. Update Role");
-					System.out.println("3. Update Location");
-					System.out.println("4. Update Start Date");
-					System.out.println("5. Update End Date");
+				//	System.out.println("1. Update Company Name");
+				//	System.out.println("2. Update Role");
+					System.out.println("1. Update Location");
+				//	System.out.println("4. Update Start Date");
+					System.out.println("2. Update End Date");
 					System.out.println("9. Quit Updating Work Experience");
 
 					switch (esql.readChoice()){
-						case 1: 
+						/*case 1: 
 							System.out.print("\tEnter new Company Name: ");
          						companyName = esql.in.readLine();
 							String query1 = String.format("UPDATE work_expr set company = '%s' WHERE userId = '"+currentUser+"'",companyName);
@@ -1061,21 +1070,21 @@ class Profile{
 							System.out.print("\tEnter new Role: ");
          						userRole = esql.in.readLine();
 							String query2 = String.format("UPDATE work_expr set role = '%s' WHERE userId = '"+currentUser+"'",userRole);
-							esql.executeUpdate(query2); break;
-						case 3:
+							esql.executeUpdate(query2); break;*/
+						case 1:
 							System.out.print("\tEnter new Location: ");
          						userLocation = esql.in.readLine();
-							String query3 = String.format("UPDATE work_expr set location = '%s' WHERE userId = '"+currentUser+"'",userLocation);
+							String query3 = String.format("UPDATE work_expr set location = '%s' WHERE userId = '"+currentUser+"' AND company = '%s' AND role = '%s' AND start_date = '%s'",userLocation, companyName, userRole, startDate);
 							esql.executeUpdate(query3); break;
-						case 4:
+						/*case 4:
 							System.out.print("\tEnter new Start Date: ");
          						startDate = esql.in.readLine();
 							String query4 = String.format("UPDATE work_expr set start_date = '%s' WHERE userId = '"+currentUser+"'",startDate);
-							esql.executeUpdate(query4); break;
-						case 5:
+							esql.executeUpdate(query4); break;*/
+						case 2:
 							System.out.print("\tEnter new End Date: ");
          						endDate = esql.in.readLine();
-							String query5 = String.format("UPDATE work_expr set end_date = '%s' WHERE userId = '"+currentUser+"'",endDate);
+							String query5 = String.format("UPDATE work_expr set end_date = '%s' WHERE userId = '"+currentUser+"'AND company = '%s' AND role = '%s' AND start_date = '%s'",endDate, companyName, userRole, startDate);
 							esql.executeUpdate(query5); break;
 						case 9: 
 							keepon = false; break;
@@ -1091,16 +1100,28 @@ class Profile{
 	}
 
 	//deletes all of the users work experience information
+
+	// add some code to tell user that the touple they are trying
+	// to delete does not exist
 	public static void DeleteWorkExp(ProfNetwork esql, String currentUser){
 		try{
 			boolean loop = true;
-			System.out.println("Press 1 if you want to delete your Work Experience");
-			System.out.println("Press 2 if you want to stop deleting");
 		
+			System.out.println("\tEnter the company name of the entry you wish to delete");
+			String companyName = esql.in.readLine();
+			System.out.println("\tEnter the role of the entry you wish to delete");
+			String userRole = esql.in.readLine();
+			System.out.println("\tEnter the start date of the entry you wish to delete");
+			String startDate = esql.in.readLine();
+
+			System.out.println("Press 1 if you are sure you want to delete this Work Experience");
+			System.out.println("Press 2 if you want to stop deleting");
 			int choice = esql.readChoice();
+
+
 			while (loop){
 				if (choice == 1){
-					String query = String.format("DELETE FROM work_expr WHERE userId = '%s'", currentUser);
+					String query = String.format("DELETE FROM work_expr WHERE userId = '%s' AND company = '%s' AND role = '%s' AND start_date = '%s'", currentUser, companyName, userRole, startDate);
 					esql.executeUpdate(query);
 					loop = false;
 				}
@@ -1156,23 +1177,28 @@ class Profile{
 			}
 			else{
 				boolean keepon = true;
+				System.out.println("\tEnter the major of the entry you wish to update");
+				userMajor = esql.in.readLine();
+				System.out.println("\tEnter the degree type of the entry you wish to update");
+				userDegree = esql.in.readLine();
+
 				while (keepon){
 					System.out.println("UPDATE EDUCATION MENU");
 					System.out.println("----------");
 					System.out.println("1. Update Institution Name");
-					System.out.println("2. Update Major");
-					System.out.println("3. Update Degree");
-					System.out.println("4. Update Start Date");
-					System.out.println("5. Update End Date");
+				//	System.out.println("2. Update Major");
+				//	System.out.println("3. Update Degree");
+					System.out.println("2. Update Start Date");
+					System.out.println("3. Update End Date");
 					System.out.println("9. Quit Updating Education Information");
 	
 					switch (esql.readChoice()){
 						case 1: 
 							System.out.print("\tEnter new Institution Name: ");
          						schoolName = esql.in.readLine();
-							String query1 = String.format("UPDATE educational_details set institution_name = '%s' WHERE userid = '"+currentUser+"'",schoolName);
+							String query1 = String.format("UPDATE educational_details set institution_name = '%s' WHERE userid = '"+currentUser+"' AND major = '%s' AND degree = '%s'",schoolName, userMajor, userDegree);
 							esql.executeUpdate(query1); break;
-						case 2: 
+					/*	case 2: 
 							System.out.print("\tEnter new major: ");
          						userMajor = esql.in.readLine();
 							String query2 = String.format("UPDATE educational_details set major = '%s' WHERE userid = '"+currentUser+"'",userMajor);
@@ -1181,16 +1207,16 @@ class Profile{
 							System.out.print("\tEnter new degree: ");
          						userDegree = esql.in.readLine();
 							String query3 = String.format("UPDATE educational_details set degree = '%s' WHERE userid = '"+currentUser+"'",userDegree);
-							esql.executeUpdate(query3); break;
-						case 4:
+							esql.executeUpdate(query3); break;*/
+						case 2:
 							System.out.print("\tEnter new start Date: ");
          						startDate = esql.in.readLine();
-							String query4 = String.format("UPDATE educational_details set start_date = '%s' WHERE userid = '"+currentUser+"'",startDate);
+							String query4 = String.format("UPDATE educational_details set start_date = '%s' WHERE userid = '"+currentUser+"'AND major = '%s' AND degree = '%s'",startDate, userMajor, userDegree);
 							esql.executeUpdate(query4); break;
-						case 5:
+						case 3:
 							System.out.print("\tEnter new end Date: ");
          						endDate = esql.in.readLine();
-							String query5 = String.format("UPDATE educational_details set end_date = '%s' WHERE userid = '"+currentUser+"'",endDate);
+							String query5 = String.format("UPDATE educational_details set end_date = '%s' WHERE userid = '"+currentUser+"'AND major = '%s' AND degree = '%s'",endDate, userMajor, userDegree);
 							esql.executeUpdate(query5); break;
 						case 9: 
 							keepon = false; break;
@@ -1209,13 +1235,18 @@ class Profile{
 	public static void DeleteSchool(ProfNetwork esql, String currentUser){
 		try{
 			boolean loop = true;
+			System.out.println("\tEnter the major of the entry you wish to delete");
+			String userMajor = esql.in.readLine();
+			System.out.println("\tEnter the degree of the entry you wish to delete");
+			String userDegree = esql.in.readLine();
+
 			System.out.println("Are you sure you want to delete your stored school information?");
 			System.out.println("Press 1 if yes");
 			System.out.println("Press 2 if no");
 			int choice = esql.readChoice();
 			while (loop){
 				if (choice == 1){
-					String query = 	String.format("DELETE FROM educational_details WHERE userid = '%s'", currentUser);
+					String query = 	String.format("DELETE FROM educational_details WHERE userid = '%s' AND major = '%s' AND degree = '%s'", currentUser, userMajor, userDegree);
 					esql.executeUpdate(query);
 					loop = false;
 				}

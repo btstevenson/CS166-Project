@@ -906,20 +906,21 @@ class Profile{
 			System.out.println("4. Update Work Experience");
 			System.out.println("5. Delete Work Experience");
 			System.out.println("6. Add Education Details");
-			System.out.println("7. Update Work Experience");
+			System.out.println("7. Update Education Details");
 			System.out.println("8. Remove Education Details");
 			System.out.println("---------");
 			System.out.println("10. Return to Main Menu");
 
 			switch(esql.readChoice()){
 				case 1: break;
-				case 2: UpdatePassword(esql,currentUser); break;
-				case 3: break;
-				case 4: break;
-				case 5: break;
-				case 6: break;
-				case 7: break;
-				case 8: break;
+				case 2: UpdatePassword(esql,currentUser); break;//finished
+				case 3: AddWorkExp(esql,currentUser); break;//finished
+				case 4: UpdateWorkExp(esql,currentUser); break;
+				case 5: DeleteWorkExp(esql,currentUser); break;//finished
+				//dont allow updates until add fcn has been completed
+				case 6: AddSchool(esql,currentUser); break; //finished hopefully
+				case 7: UpdateSchool(esql,currentUser); break; //finished
+				case 8: DeleteSchool(esql,currentUser); break; //finished
 				case 10: getChoice = false; break;
 				default: System.out.println("Invalid input. Please try again.");
 			}
@@ -997,21 +998,233 @@ class Profile{
 	}
 
 	public static void AddWorkExp(ProfNetwork esql, String currentUser){
+		try{
+			System.out.print("\tEnter new Company Name: ");
+         		String companyName = esql.in.readLine();
+			System.out.print("\tEnter new Role: ");
+         		String userRole = esql.in.readLine();
+			System.out.print("\tEnter new Location: ");
+         		String userLocation = esql.in.readLine();
+			System.out.print("\tEnter new Start Date: ");
+         		String startDate = esql.in.readLine();
+			System.out.print("\tEnter new End Date: ");
+         		String endDate = esql.in.readLine();
+			
+		/*	String query = String.format("INSERT INTO work_expr (userId, company, role, location, startdate, enddate) " + "VALUES('"+currentUser"', '"+companyName"', '"+userRole"', '"+userLocation"', '"+startDate"', '"+endDate"')");*/
+			String query = String.format("INSERT INTO work_expr (userId, company, role, location, start_date, end_date) VALUES('%s', '%s', '%s', '%s', '%s', '%s')",currentUser, companyName, userRole, userLocation, startDate, endDate);
+
+			esql.executeUpdate(query);
+		}catch (Exception e){
+			System.err.println(e.getMessage());
+			}
 	}
 
 	public static void UpdateWorkExp(ProfNetwork esql, String currentUser){
+		String companyName;
+		String userRole;
+		String userLocation;
+		String startDate;
+		String endDate;
+		try{
+			String testQuery = String.format("SELECT company, role FROM work_expr WHERE userId = '%s'",currentUser);
+			List<List<String>> result  = new ArrayList<List<String>>();
+			result = esql.executeQueryAndReturnResult(testQuery);
+			if (result.isEmpty()){
+				System.out.println("You need to go back to the previous menu and Add Work Experience before you can update it.");
+			}
+			else{
+																								boolean keepon = true;
+				while (keepon){
+					System.out.println("UPDATE WORK EXPERIENCE");
+					System.out.println("----------");
+					System.out.println("1. Update Company Name");
+					System.out.println("2. Update Role");
+					System.out.println("3. Update Location");
+					System.out.println("4. Update Start Date");
+					System.out.println("5. Update End Date");
+					System.out.println("9. Quit Updating Work Experience");
+
+					switch (esql.readChoice()){
+						case 1: 
+							System.out.print("\tEnter new Company Name: ");
+         						companyName = esql.in.readLine();
+							String query1 = String.format("UPDATE work_expr set company = '%s' WHERE userId = '"+currentUser+"'",companyName);
+							esql.executeUpdate(query1); break;
+						case 2: 
+							System.out.print("\tEnter new Role: ");
+         						userRole = esql.in.readLine();
+							String query2 = String.format("UPDATE work_expr set role = '%s' WHERE userId = '"+currentUser+"'",userRole);
+							esql.executeUpdate(query2); break;
+						case 3:
+							System.out.print("\tEnter new Location: ");
+         						userLocation = esql.in.readLine();
+							String query3 = String.format("UPDATE work_expr set location = '%s' WHERE userId = '"+currentUser+"'",userLocation);
+							esql.executeUpdate(query3); break;
+						case 4:
+							System.out.print("\tEnter new Start Date: ");
+         						startDate = esql.in.readLine();
+							String query4 = String.format("UPDATE work_expr set start_date = '%s' WHERE userId = '"+currentUser+"'",startDate);
+							esql.executeUpdate(query4); break;
+						case 5:
+							System.out.print("\tEnter new End Date: ");
+         						endDate = esql.in.readLine();
+							String query5 = String.format("UPDATE work_expr set end_date = '%s' WHERE userId = '"+currentUser+"'",endDate);
+							esql.executeUpdate(query5); break;
+						case 9: 
+							keepon = false; break;
+						default: 	
+							System.out.println("Invalid choice. Please try again.");
+					}
+				}
+			}
+		}catch (Exception e){
+			System.err.println(e.getMessage());
+			}
+		
 	}
 
 	public static void DeleteWorkExp(ProfNetwork esql, String currentUser){
+		try{
+			boolean loop = true;
+			System.out.println("Are you sure you want to delete your stored work experience?");
+			System.out.println("Press 1 if yes");
+			System.out.println("Press 2 if no");
+			int choice = esql.readChoice();
+			while (loop){
+				if (choice == 1){
+					String query = 	String.format("DELETE FROM work_expr WHERE userId = '%s'", currentUser);
+					esql.executeUpdate(query);
+					loop = false;
+				}
+				else if (choice == 2){ // do nothing and just let the function exit
+					loop = false;
+				}
+				else{
+					System.out.println("Wrong entry. Please enter a 1 or 2.");
+					choice = esql.readChoice();
+				}
+			}
+		}catch (Exception e){
+			System.err.println(e.getMessage());
+			}
+
 	}
 
 	public static void AddSchool(ProfNetwork esql, String currentUser){
+
+		/*    Temporarily keeping these in
+		String query1 = String.format("UPDATE educational_details set institutionName = '%s' WHERE userid = '"+currentUser+"'",schoolName);
+		String query2 = String.format("UPDATE educational_details set major = '%s' WHERE userid = '"+currentUser+"'",userMajor);
+		String query3 = String.format("UPDATE educational_details set degree = '%s' WHERE userid = '"+currentUser+"'",userDegree);
+		String query4 = String.format("UPDATE educational_details set startdate = '%s' WHERE userid = '"+currentUser+"'",startDate);
+		String query5 = String.format("UPDATE educational_details set enddate = '%s' WHERE userid = '"+currentUser+"'",endDate);*/
+		try{
+			System.out.print("\tEnter new Institution Name: ");
+         		String schoolName = esql.in.readLine();
+			System.out.print("\tEnter new Major: ");
+         		String userMajor = esql.in.readLine();
+			System.out.print("\tEnter new Degree: ");
+         		String userDegree = esql.in.readLine();
+			System.out.print("\tEnter new Start Date: ");
+         		String startDate = esql.in.readLine();
+			System.out.print("\tEnter new End Date: ");
+         		String endDate = esql.in.readLine();
+			
+			String query = String.format("INSERT INTO educational_details (userid, institution_name, major, degree, start_date, end_date) VALUES('%s', '%s', '%s', '%s', '%s', '%s')",currentUser, schoolName, userMajor, userDegree, startDate, endDate);
+			esql.executeUpdate(query);
+		}catch (Exception e){
+			System.err.println(e.getMessage());
+			}
 	}
 
 	public static void UpdateSchool(ProfNetwork esql, String currentUser){
+		String schoolName;
+		String userMajor;
+		String userDegree;
+		String startDate;
+		String endDate;
+		try{
+			String testQuery = String.format("SELECT institution_name, major FROM educational_details WHERE userid = '%s'",currentUser);
+			List<List<String>> result  = new ArrayList<List<String>>();
+			result = esql.executeQueryAndReturnResult(testQuery);
+			if (result.isEmpty()){
+				System.out.println("You need to go back to the previous menu and Add Education Details before you can update it.");
+			}
+			else{
+				boolean keepon = true;
+				while (keepon){
+					System.out.println("UPDATE EDUCATION MENU");
+					System.out.println("----------");
+					System.out.println("1. Update Institution Name");
+					System.out.println("2. Update Major");
+					System.out.println("3. Update Degree");
+					System.out.println("4. Update Start Date");
+					System.out.println("5. Update End Date");
+					System.out.println("9. Quit Updating Education Information");
+	
+					switch (esql.readChoice()){
+						case 1: 
+							System.out.print("\tEnter new Institution Name: ");
+         						schoolName = esql.in.readLine();
+							String query1 = String.format("UPDATE educational_details set institution_name = '%s' WHERE userid = '"+currentUser+"'",schoolName);
+							esql.executeUpdate(query1); break;
+						case 2: 
+							System.out.print("\tEnter new major: ");
+         						userMajor = esql.in.readLine();
+							String query2 = String.format("UPDATE educational_details set major = '%s' WHERE userid = '"+currentUser+"'",userMajor);
+							esql.executeUpdate(query2); break;
+						case 3:
+							System.out.print("\tEnter new degree: ");
+         						userDegree = esql.in.readLine();
+							String query3 = String.format("UPDATE educational_details set degree = '%s' WHERE userid = '"+currentUser+"'",userDegree);
+							esql.executeUpdate(query3); break;
+						case 4:
+							System.out.print("\tEnter new start Date: ");
+         						startDate = esql.in.readLine();
+							String query4 = String.format("UPDATE educational_details set start_date = '%s' WHERE userid = '"+currentUser+"'",startDate);
+							esql.executeUpdate(query4); break;
+						case 5:
+							System.out.print("\tEnter new end Date: ");
+         						endDate = esql.in.readLine();
+							String query5 = String.format("UPDATE educational_details set end_date = '%s' WHERE userid = '"+currentUser+"'",endDate);
+							esql.executeUpdate(query5); break;
+						case 9: 
+							keepon = false; break;
+						default: 	
+							System.out.println("Invalid choice. Please try again.");
+					}
+				}
+			}
+		}catch (Exception e){
+			System.err.println(e.getMessage());
+			}
+		
 	}
 
 	public static void DeleteSchool(ProfNetwork esql, String currentUser){
+		try{
+			boolean loop = true;
+			System.out.println("Are you sure you want to delete your stored school information?");
+			System.out.println("Press 1 if yes");
+			System.out.println("Press 2 if no");
+			int choice = esql.readChoice();
+			while (loop){
+				if (choice == 1){
+					String query = 	String.format("DELETE FROM educational_details WHERE userid = '%s'", currentUser);
+					esql.executeUpdate(query);
+					loop = false;
+				}
+				else if (choice == 2){ // do nothing and just let the function exit
+					loop = false;
+				}
+				else{
+					System.out.println("Wrong entry. Please enter a 1 or 2.");
+					choice = esql.readChoice();
+				}
+			}
+		}catch (Exception e){
+			System.err.println(e.getMessage());
+			}
 	}
 	
 	// no limit how far but to send connection will only be available to valid users
@@ -1019,15 +1232,14 @@ class Profile{
 	}
 
 	public static void UpdatePassword(ProfNetwork esql, String currentUser){
-		//BRANDON DO YOU THINK THIS WILL WORK?
-	/*	List<List<String>> result = new ArrayList<List<String>>();
-		String query = String.format("UPDATE usr set password = '%s' WHERE userid = '"+currentUser+"'",password);
-		try{
+		String password;
+				try{
 			System.out.print("\tEnter new password: ");
-         		String password = in.readLine();
-			result = esql.executeUpdate(query);
-	}catch (Exception e){
+         		password = esql.in.readLine();
+			String query = String.format("UPDATE usr set password = '%s' WHERE userid = '"+currentUser+"'",password);
+			esql.executeUpdate(query);
+		}catch (Exception e){
 			System.err.println(e.getMessage());
-		}*/
-
+			}
+	}
 } //end Profile

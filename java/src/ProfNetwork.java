@@ -684,6 +684,8 @@ class Messenger{
 *
 **************************************************/
 class UserConnect{
+	public static Profile prof = new Profile();
+	public static Messenger msg = new Messenger();
 	//display the connection menu allowing user to accept/decline or send requests
 	public static void ConnectMenu(ProfNetwork esql, String currentUser){
 		boolean getChoice = true;
@@ -708,14 +710,47 @@ class UserConnect{
 	// need to add menu to be able to view a friends profile
 	// list the friends by number so user can select which one to view
 	public static void ConnectionList(ProfNetwork esql, String currentUser){
+		List<List<String>> result = new ArrayList<List<String>>();
 	   try{
-			String query = String.format("SELECT connectionid FROM connection_usr WHERE userID = '%s' AND status										= '%s' UNION SELECT userid FROM connection_usr WHERE connectionid = '%s' AND status= '%s'", 
+			String query = String.format("SELECT connectionid AS userid FROM connection_usr WHERE userID = '%s' AND status										= '%s' UNION ALL SELECT userid FROM connection_usr WHERE connectionid = '%s' AND status= '%s'", 
 						   currentUser, "Accept", currentUser, "Accept");
-	   System.out.println("\nFriends List:");
-	   int result = esql.executeQueryAndPrintResult(query);
-	   if(result < 1){
-			System.out.println("You currently do not have any friends. Try sending connection requests.\n");
-	   }
+			result = esql.executeQueryAndReturnResult(query);
+			if(result.isEmpty()){
+				System.out.println("You currently do not have any friends. Try sending connection requests.\n");
+			}
+			else{	
+				boolean getChoice = true;
+				while(getChoice){
+					System.out.println("\nConnection List: ");
+					int count = 1;
+					for(int i = 0; i < result.size(); i++){
+						System.out.println(""+count+". " + ""+result.get(i).get(0)+"");
+						count++;
+					}
+					System.out.println("\n1. View connection profile");
+					System.out.println("2. Send Message");
+					System.out.println("---------");
+					System.out.println("9. Return to previous menu");
+					
+					int usrChoice = 0; 
+					switch(esql.readChoice()){
+						case 1: System.out.print("Please enter the number of the connection you wish to view:");
+								usrChoice = Integer.parseInt(esql.in.readLine().trim()) - 1;
+								System.out.println();
+								prof.ViewUserProfile(esql, currentUser, result.get(usrChoice).get(0));
+								break;
+						case 2: System.out.println("Please enter the number of the connection you wish to send a message.");
+								usrChoice = Integer.parseInt(esql.in.readLine().trim()) -1;
+								System.out.println();
+								msg.SendMessageProfile(esql, currentUser, result.get(usrChoice).get(0));
+								break;
+						case 9: getChoice = false; break;
+						default: System.out.println("Invalid choice. Please try again.");	
+								 
+					}
+				}
+			}
+
 	   }catch(Exception e){
 		   System.err.println (e.getMessage());
 	   }
@@ -800,7 +835,9 @@ class UserConnect{
 				System.out.println("\nCannot send request to this user. They are not within a valid connection level.");
 			}
 		} catch (Exception e){
-			System.err.println(e.getMessage());
+			if(e.getMessage().contains("duplicate")){
+				System.out.println("You have already sent a connection to this person.");
+			}
 		}
 	}
 	
@@ -905,53 +942,43 @@ class UserConnect{
 } // end UserConnect
 
 class Profile{
-	Messenger msg = new Messenger(); // local global for accessing messenger methods
-	UserConnect conn = new UserConnect(); // local global for accessing userconnect methods
+	public static Messenger msg = new Messenger(); // local global for accessing messenger methods
+	public static UserConnect conn = new UserConnect(); // local global for accessing userconnect methods
 	
 	public static void ProfileMenu(ProfNetwork esql, String currentUser){
 		boolean getChoice = true;
 		while(getChoice){
 			// Potentially add friends list in here
 			System.out.println("Profile Menu");
-			System.out.println("1. Change E-mail");
-			System.out.println("2. Change password");
-			System.out.println("3. Change Full Name");
-			System.out.println("4. Change Date of Birth");
-			System.out.println("5. Add Work Experience");
-			System.out.println("6. Update Work Experience");
-			System.out.println("7. Delete Work Experience");
-			System.out.println("8. Add Education Details");
-			System.out.println("9. Update Education Details");
-			System.out.println("10. Remove Education Details");
-			System.out.println("11. Display Current Profile");
+			System.out.println("1. View Connection List");
+			System.out.println("2. Change E-mail");
+			System.out.println("3. Change password");
+			System.out.println("4. Change Full Name");
+			System.out.println("5. Change Date of Birth");
+			System.out.println("6. Add Work Experience");
+			System.out.println("7. Update Work Experience");
+			System.out.println("8. Delete Work Experience");
+			System.out.println("9. Add Education Details");
+			System.out.println("10. Update Education Details");
+			System.out.println("11. Remove Education Details");
+			System.out.println("12. Display Current Profile");
 			System.out.println("---------");
-			System.out.println("12. Return to Main Menu");
+			System.out.println("14. Return to Main Menu");
 
 			switch(esql.readChoice()){
-<<<<<<< HEAD
-				case 1: break;
-				case 2: break;
-				case 3: break;
-				case 4: break;
-				case 5: break;
-				case 6: break;
-				case 7: break;
-				case 8: break;
-				case 10: getChoice = false; break;
-=======
-				case 1: UpdateEmail(esql,currentUser); break;
-				case 2: UpdatePassword(esql,currentUser); break;
-				case 3: UpdateFullName(esql,currentUser); break;
-				case 4: UpdateDateofBirth(esql,currentUser); break;
-				case 5: AddWorkExp(esql,currentUser); break;
-				case 6: UpdateWorkExp(esql,currentUser); break;
-				case 7: DeleteWorkExp(esql,currentUser); break;
-				case 8: AddSchool(esql,currentUser); break; 
-				case 9: UpdateSchool(esql,currentUser); break; 
-				case 10: DeleteSchool(esql,currentUser); break;
-				case 11: GetCurrProfile(esql,currentUser); break;
-				case 12: getChoice = false; break;
->>>>>>> 57968d3949fe1df7c3456510f9f760548b176e52
+				case 1: conn.ConnectionList(esql, currentUser); break;
+				case 2: UpdateEmail(esql,currentUser); break;
+				case 3: UpdatePassword(esql,currentUser); break;
+				case 4: UpdateFullName(esql,currentUser); break;
+				case 5: UpdateDateofBirth(esql,currentUser); break;
+				case 6: AddWorkExp(esql,currentUser); break;
+				case 7: UpdateWorkExp(esql,currentUser); break;
+				case 8: DeleteWorkExp(esql,currentUser); break;
+				case 9: AddSchool(esql,currentUser); break; 
+				case 10: UpdateSchool(esql,currentUser); break; 
+				case 11: DeleteSchool(esql,currentUser); break;
+				case 12: GetCurrProfile(esql,currentUser); break;
+				case 14: getChoice = false; break;
 				default: System.out.println("Invalid input. Please try again.");
 			}
 		}
@@ -1021,6 +1048,102 @@ class Profile{
 	
 	// for displaying user profiles, will have check to see if connection or not
 	public static void ViewUserProfile(ProfNetwork esql, String currentUser, String usrName){
+		boolean connection = false;
+		List<List<String>> result = new ArrayList<List<String>>();
+		String query = String.format("SELECT connectionid AS userid FROM connection_usr WHERE userid = '"+usrName+"' AND connectionid = '"+currentUser+"' AND status = 'Accept' UNION ALL SELECT userid FROM connection_usr WHERE userid = '"+currentUser+"' AND connectionid = '"+usrName+"' AND status = 'Accept'");
+		try{
+			if(esql.executeQuery(query) > 0){
+				connection = true;
+				query = String.format("SELECT name, date_of_birth FROM usr WHERE userid = '"+usrName+"'");
+				try{
+					result = esql.executeQueryAndReturnResult(query);
+					System.out.println("Name: "+result.get(0).get(0)+"");
+					System.out.println("Date of Birth: "+result.get(0).get(1)+"\n");
+				} catch (Exception e){
+					System.err.println(e.getMessage());
+				}
+			} else{
+				System.out.println("Userid: "+usrName+"");
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
+		result.clear();
+		query = String.format("SELECT company, role, location, start_date, end_date FROM work_expr WHERE userid = '"+currentUser+"'");
+		int count = 1;
+		try{
+			// prints out work details
+			System.out.println("Work Experience: ");
+			result = esql.executeQueryAndReturnResult(query);
+			if(result.isEmpty()){
+				System.out.println("None");
+			} else{
+				for(int i = 0; i < result.size(); i++){
+					System.out.print("\t "+count+". ");
+					for(int j = 0; j < result.get(i).size(); j++){	
+						System.out.print(""+result.get(i).get(j)+"");
+						System.out.print(" ");
+					}
+					System.out.println();
+					count++;
+				}
+				System.out.println();
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
+		count = 1;
+		result.clear();
+		query = String.format("SELECT institution_name, major, degree, start_date, end_date FROM educational_details WHERE userid = '"+currentUser+"'");
+		try{
+			// prints out education details
+			System.out.println("Education: ");
+			result = esql.executeQueryAndReturnResult(query);
+			if(result.isEmpty()){
+				System.out.println("None\n");
+			} else{
+				for(int i = 0; i < result.size(); i++){
+					System.out.print("\t "+count+". "); 
+					for(int j = 0; j < result.get(i).size(); j++){
+						System.out.print(""+result.get(i).get(j)+"");
+						System.out.print(" ");
+					}
+					count++;
+					System.out.println();
+				}
+				System.out.println();
+			}
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
+		boolean getChoice = true;
+		while(getChoice){
+			System.out.println("Profile View Options");
+			System.out.println("---------");
+			System.out.println("1. View profile connections");
+			System.out.println("2. Send Message");
+			query = String.format("SELECT * FROM %s WHERE userid = '"+usrName+"'", "\""+currentUser+"\"");
+			boolean connReq = false;
+			try{
+				if(esql.executeQuery(query) > 0){
+					System.out.println("3. Send connection request");
+					connReq = true;
+				}
+			} catch (Exception e){
+				System.err.println(e.getMessage());
+			}
+			System.out.println("9.Return to previous menu");
+			switch(esql.readChoice()){
+				case 1: ViewUserConnections(esql, currentUser, usrName, connection); break;
+				case 2: msg.SendMessageProfile(esql, currentUser, usrName); break;
+				case 3: if(connReq){
+							conn.ProfileRequest(esql, currentUser, usrName);
+						} break;
+				case 9: getChoice = false; break;
+				default: System.out.println("Invalid choice. Please try again.");
+			}
+		}
+		
 	}
 	
 	// allows to search any user
@@ -1288,13 +1411,60 @@ class Profile{
 	}
 	
 	// no limit how far but to send connection will only be available to valid users
-	public static void ViewUserFriends(ProfNetwork esql, String usrName){
+	public static void ViewUserConnections(ProfNetwork esql, String currentUser, String usrName, boolean connection){
+		String query = String.format("SELECT connectionid AS userid FROM connection_usr WHERE userid = '"+usrName+"' AND connectionid <> '"+currentUser+"' AND status = 'Accept' UNION ALL SELECT userid FROM connection_usr WHERE  userid <> '"+currentUser+"' AND connectionid = '"+usrName+"' AND status = 'Accept'");
+		List<List<String>> result = new ArrayList<List<String>>();
+		try{
+			result = esql.executeQueryAndReturnResult(query);
+		} catch (Exception e){
+			System.err.println(e.getMessage());
+		}
+		
+		boolean getChoice = true;
+		while(getChoice){
+			System.out.println(""+usrName+"'s connection list:");
+			int count = 1;
+			int usrChoice = 0;
+			if(result.size() > 0){
+				for(int i = 0; i < result.size(); i++){
+					System.out.println(""+count+". " + ""+result.get(i).get(0)+"");
+					count++;
+				}
+			} else{
+				System.out.println("Only has you as a connection.");
+			}
+			System.out.println();
+			System.out.println("1. View connection profile");
+			System.out.println("2. Send message");
+			System.out.println("---------");
+			System.out.println("9. Return to previous menu");
+			switch(esql.readChoice()){
+				case 1: System.out.print("Please enter the number of the connection you want to view: ");
+						try{
+							usrChoice = Integer.parseInt(esql.in.readLine().trim()) - 1;
+						} catch (Exception e){
+							System.err.println(e.getMessage());
+						}
+						ViewUserProfile(esql, currentUser, result.get(usrChoice).get(0)); break;
+				case 2: System.out.print("Please enter the number of the connection you want to send a message: ");
+						try{
+							usrChoice = Integer.parseInt(esql.in.readLine().trim()) - 1;
+						} catch (Exception e){
+							System.err.println(e.getMessage());
+						}
+						msg.SendMessageProfile(esql, currentUser, result.get(usrChoice).get(0)); break;
+				case 9: getChoice = false; break;
+				default: System.out.println("Invalid choice. Please try again.");
+						 try{
+							 String errCtch = esql.in.readLine();
+						 } catch (Exception e){
+						 }
+			}
+		}
 	}
 	
 	//allows the user to update their password after initially entering it when creating login
 	public static void UpdatePassword(ProfNetwork esql, String currentUser){
-<<<<<<< HEAD
-=======
 		String password;
 		try{
 			System.out.print("\tEnter new password: ");
@@ -1344,8 +1514,6 @@ class Profile{
 			esql.executeUpdate(query);
 		}catch (Exception e){
 			System.err.println(e.getMessage());
-			}
-	
->>>>>>> 57968d3949fe1df7c3456510f9f760548b176e52
+		}
 	}
 } //end Profile

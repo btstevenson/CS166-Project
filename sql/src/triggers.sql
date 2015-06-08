@@ -5,30 +5,25 @@ SELECT setval('msgIDSequence', 27811);
 /* searches for valid connection possibilities */
 CREATE OR REPLACE FUNCTION conn_search(connName varchar) RETURNS VOID AS $$
 DECLARE
-	tempResult connection_usr%rowtype;
 	tempI connection_usr%rowtype;
 	tempJ connection_usr%rowtype;
+	tempK connection_usr%rowtype;
 	tableName ALIAS FOR $1;
-	sql text;
 BEGIN 
-	SELECT * INTO tempResult 
-	FROM pg_catalog.pg_tables
-	WHERE tablename = 'connName';
-	
-	IF NOT FOUND THEN
-		BEGIN	
-			RAISE WARNING 'before execute table';
+		BEGIN
+			RAISE NOTICE 'table name is: %', tableName;	
 			EXECUTE 'CREATE TABLE '|| quote_ident(tableName) ||' (userId varchar(50))';
 		EXCEPTION WHEN duplicate_table THEN
 
 		END;
-	END IF;
-	RAISE DEBUG 'just a test';
-	FOR tempI IN SELECT connectionid FROM connection_usr WHERE userid = connName AND status = 'Accept' UNION SELECT userid FROM connection_usr WHERE connectionid = connName AND status = 'Accept' LOOP
-			FOR tempJ IN SELECT connectionid FROM connection_usr WHERE userid = tempI.userid AND connectionid <> connName AND status = 'Accept' UNION SELECT userid FROM connection_usr WHERE connectionid = tempI.userid AND userid <> connName AND status = 'Accept' LOOP 
+	FOR tempI IN SELECT connectionid AS userid FROM connection_usr WHERE userid = connName AND status = 'Accept' UNION ALL SELECT userid FROM connection_usr WHERE connectionid = connName AND status = 'Accept' LOOP
+			FOR tempJ IN SELECT connectionid AS userid FROM connection_usr WHERE userid = tempI.userid AND connectionid <> connName AND status = 'Accept' UNION SELECT userid FROM connection_usr WHERE connectionid = tempI.userid AND userid <> connName AND status = 'Accept'  LOOP				  
+				RAISE NOTICE 'TempJ is: %', tempJ.userid;
 				EXECUTE 'INSERT INTO '|| quote_ident(tableName) ||' ' || 'VALUES (' || quote_literal(tempJ.userid) || ')';
+				FOR tempK IN SELECT connectionid AS userid FROM connection_usr WHERE userid = tempJ.userid AND connectionid <> tempI.userid AND status = 'Accept' UNION ALL SELECT userid FROM connection_usr WHERE connectionid = tempJ.userid AND userid <> tempI.userid AND status = 'Accept' LOOP
+					EXECUTE 'INSERT INTO '|| quote_ident(tableName) ||' ' || 'VALUES (' || quote_literal(tempK.userid) || ')';	
+				END LOOP;
 			END LOOP;
-		EXECUTE 'INSERT INTO '|| quote_ident(tableName) ||' ' || 'VALUES (' || quote_literal(tempI.userid) || ')';
 	END LOOP;
 END
 $$ LANGUAGE plpgsql;	

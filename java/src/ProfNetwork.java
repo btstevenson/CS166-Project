@@ -290,7 +290,8 @@ public class ProfNetwork {
                    case 2: menu.MessageService(esql, authorisedUser); break;
                    case 3: conn.ConnectMenu(esql, authorisedUser); break;
 				   case 4: conn.Search(esql); break;
-                   case 9: usermenu = false; break;
+                   case 9: usermenu = false; 
+						   TableCleanup(esql, authorisedUser); break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
               }
@@ -381,7 +382,9 @@ public class ProfNetwork {
 
          String query = String.format("SELECT * FROM USR WHERE userId = '%s' AND password = '%s'", login, password);
          int userNum = esql.executeQuery(query);
-	 if (userNum > 0){		 
+	 if (userNum > 0){
+		 query = String.format("SELECT conn_search('"+login+"')");
+		 userNum = esql.executeQuery(query);		 
 		return login;
 	 }
 	 else
@@ -394,6 +397,15 @@ public class ProfNetwork {
          return null;
       }
    }//end
+
+   public static void TableCleanup(ProfNetwork esql, String currentUser){
+	   String query = String.format("DROP TABLE %s",  "\""+ currentUser +"\"");
+	   try{
+		esql.executeUpdate(query);
+	   } catch (Exception e){
+		   System.err.println(e.getMessage());
+	   }
+   }
 
 }//end ProfNetwork
 
@@ -819,9 +831,9 @@ class UserConnect{
 			int count = Integer.parseInt(result.get(0).get(0).trim());
 			if(count > 4){	
 				try{
-					query = String.format("SELECT conn_search('"+currentUser+"', '"+userReq+"')");
-					result = esql.executeQueryAndReturnResult(query);
-					if(result.get(0).get(0).equals("t")){
+					query = String.format("SELECT * FROM %s WHERE userid = '%s'", "\"" + currentUser + "\"", userReq);
+					int size = esql.executeQuery(query);
+					if(size > 0){
 						status = true;
 					} else {
 						status = false;
@@ -913,7 +925,7 @@ class Profile{
 
 			switch(esql.readChoice()){
 				case 1: break;
-				case 2: UpdatePassword(esql,currentUser); break;
+				case 2: break;
 				case 3: break;
 				case 4: break;
 				case 5: break;
@@ -1019,15 +1031,5 @@ class Profile{
 	}
 
 	public static void UpdatePassword(ProfNetwork esql, String currentUser){
-		//BRANDON DO YOU THINK THIS WILL WORK?
-	/*	List<List<String>> result = new ArrayList<List<String>>();
-		String query = String.format("UPDATE usr set password = '%s' WHERE userid = '"+currentUser+"'",password);
-		try{
-			System.out.print("\tEnter new password: ");
-         		String password = in.readLine();
-			result = esql.executeUpdate(query);
-	}catch (Exception e){
-			System.err.println(e.getMessage());
-		}*/
-
+	}
 } //end Profile

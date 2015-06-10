@@ -445,6 +445,7 @@ class Messenger{
 	*************************************/
 	public static void MessageService(ProfNetwork esql, String currentUser){
 		boolean menuOn = true;
+		System.out.println("\f\f\f\f\f\f\f\f\f\f\f\f\f\f");
 		while(menuOn){
 			System.out.println("\nMessenger Menu");
 			System.out.println("---------");
@@ -481,6 +482,7 @@ class Messenger{
 	*********************************/
 	public static void ReadMessageMenu(ProfNetwork esql, String currentUser){
 		boolean getChoice = true;
+		System.out.println("\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f");
 		while(getChoice){
 			System.out.println("\nRead Messages Menu");
 			System.out.println("---------");
@@ -519,10 +521,11 @@ class Messenger{
 						break;
 				case 9: getChoice = false; 
 						break;
-				default: System.out.println("\nERROR: Invalid input. Please try again.\n");
+				default: System.out.println("\nInvalid input. Please try again.\n");
 			}
 		}
 	}
+
 	/**********************************
 	* Method Name: ReadMessage
 	* Programmer: Brandon Stevenson
@@ -554,15 +557,28 @@ class Messenger{
 					}
 				}
 			}catch (Exception e){
-				System.err.println(e.getMessage());
 			}
 		}catch (Exception e){
 			System.out.println("Invalid input. The message id is an integer. Please try again");
 		}
 	}
 	// maybe add a search option so a user can message anyone on network from here
+	/*********************************
+	* Method Name: SendMessageMenu
+	* Programmer: Brandon Stevenson
+	* Date: 5/28/15
+	* Purpose: Allows user to send
+	* message, view sent messages and
+	* delete messages
+	*
+	* Input: ProfNetwork object
+	*	     String object 
+	*
+	* Output: None
+	*********************************/
 	public static void SendMessageMenu(ProfNetwork esql, String currentUser){
 		boolean getChoice = true;
+		System.out.println("\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f");
 		while(getChoice){
 			System.out.println("\nSend Messages Menu");
 			System.out.println("---------");
@@ -588,7 +604,19 @@ class Messenger{
 			}
 		}
 	}
-	/* allows user to send a message to another user */
+	/************************************
+	* Method Name: SendMessage
+	* Progammer: Brandon Stevenson
+	* Date: 5/28/15
+	* Purpose: Allows user to send message
+	* to another user
+	*
+	* Input: ProfNetwork object
+	*		 String object
+	*
+	* Output: None
+	*
+	*************************************/
 	public static void SendMessage(ProfNetwork esql, String currentUser){
 		try{
 			System.out.print("Please enter the userid of the user you want to send the message: ");
@@ -605,8 +633,20 @@ class Messenger{
 			System.err.println(e.getMessage());
 		}
 	}
-	/* create triggers for setting delete_status and status for inserting messages */
-	// for sending messages from viewing someones profile
+	
+	/***************************************
+	* Method Name: SendMessageProfile
+	* Programmer: Brandon Stevenson
+	* Date: 5/28/15
+	* Purpose: Send a message when viewing a 
+	* profile
+	* 
+	* Input: ProfNetwork object
+	*		 String object
+	*
+	* Output: None
+	*
+	****************************************/
 	public static void SendMessageProfile(ProfNetwork esql, String currentUser, String receiverId){
 		System.out.println("\f\f\f\f\f\f\f\f\f\f");
 		try{
@@ -622,7 +662,20 @@ class Messenger{
 			System.err.println(e.getMessage());
 		}
 	}
-    /* lists all sent mesages */
+    
+	/*****************************************
+	* Method Name: ListSentMessages 
+	* Programmer: Brandon Stevenson
+	* Date: 5/29/15
+	* Purpose: List all sent messages from
+	* the user.
+	*
+	* Input: ProfNetwork object
+	*		 String object
+	*
+	* Output: None
+	*
+	******************************************/
 	public static void ListSentMessages(ProfNetwork esql, String currentUser){
 		try{
 			String query = String.format("SELECT msgid, receiverid, status FROM message WHERE senderid = '%s' AND (delete_status = '0' OR delete_status = '2')", currentUser);
@@ -658,9 +711,20 @@ class Messenger{
 			System.err.println(e.getMessage());
 		}
 	}
-	/* deletes a message by prompting a user what msg they want to delete. might be a better 
-	   approach to print out the numbers and have them choose just based off the number and not
-	   msgid*/
+	
+	/***************************************
+	* Method Name: DeleteMessage
+	* Programmer: Brandon Stevenson
+	* Date: 5/29/15
+	* Purpose: Allows user to delete a 
+	* recieved or sent message
+	*
+	* Input: ProfNetwork object
+	*		 String object
+	*
+	* Object: None
+	*
+	****************************************/
 	public static void DeleteMessage(ProfNetwork esql, String currentUser, String type){
 		System.out.print("Please enter the message id that you would like to delete: ");
 		try{
@@ -720,7 +784,19 @@ class Messenger{
 class UserConnect{
 	public static Profile prof = new Profile();
 	public static Messenger msg = new Messenger();
-	//display the connection menu allowing user to accept/decline or send requests
+
+	/*********************************************
+	* Method Name: ConnectMenu
+	* Programmer: Brandon Stevenson
+	* Date: 5/30/15
+	* Purpose: Displays options for the connect menu
+	*
+	* Input: ProfNetwork object
+	*		 String object
+	*
+	* Output: None
+	*
+	**********************************************/
 	public static void ConnectMenu(ProfNetwork esql, String currentUser){
 		boolean getChoice = true;
 		while(getChoice){
@@ -740,9 +816,19 @@ class UserConnect{
 			}
 		}
 	}
-	// displays connections of user
-	// need to add menu to be able to view a friends profile
-	// list the friends by number so user can select which one to view
+	
+	/***********************************************
+	* Method Name: ConnectionList
+	* Programmer: Brandon Stevenson
+	* Date: 5/30/5
+	* Purpose: Displays the users connection list
+	*
+	* Input: ProfNetwork object
+	*	     String object
+	*
+	* Output: None
+	*
+	*************************************************/
 	public static void ConnectionList(ProfNetwork esql, String currentUser){
 		List<List<String>> result = new ArrayList<List<String>>();
 	   try{
@@ -791,7 +877,20 @@ class UserConnect{
 
    }
 
-	//lists pending requests and allows user to accept or decline by using a menu
+	/**********************************************
+	* Method Name: ViewRequest
+	* Programmer: Brandon Stevenson
+	* Date: 5/30/15
+	* Purpose: Display connection requests that are 
+	* waiting for the user and allows them to accept
+	* or decline the connection request
+	*
+	* Input: ProfNetwork object
+	*		 String object
+	*
+	* Output: None
+	*
+	************************************************/
 	public static void ViewRequest(ProfNetwork esql, String currentUser){
 		List<List<String>> result = new ArrayList<List<String>>();
 		try{
@@ -856,7 +955,20 @@ class UserConnect{
 		}
 	}
 
-	// for sending connection requests from connection menu, will prompt for input
+	/******************************************** 
+	* Method Name: NonProfileRequest
+	* Programmer: Brandon Stevenson
+	* Date: 5/31/15
+	* Purpose: Allows user to try and send a random
+	* connection from there profile. If valid then
+	* it goes through, if not then rejected
+	* 
+	* Input: ProfNetwork object
+	*		 String object
+	*
+	* Output: None
+	*
+	**********************************************/
 	public static void NonProfileRequest(ProfNetwork esql, String currentUser){
 		System.out.print("\nPlease enter the userid of the person you want to connect with: ");
 		try{
@@ -875,7 +987,19 @@ class UserConnect{
 		}
 	}
 	
-	// for sending connection requests from profile view
+	/******************************************
+	* Method Name: ProfileRequest
+	* Programmer: Brandon Stevenson
+	* Date: 6/1/15
+	* Purpose: Allows user to send a connection 
+	* request to valid connection level
+	*
+	* Input: ProfNetwork object
+	*	     String object
+	*
+	* Output: None
+	*
+	*******************************************/
 	public static void ProfileRequest(ProfNetwork esql, String currentUser, String userReq){
 		if(ConnectionDepthCheck(esql, currentUser, userReq)){
 			System.out.println("Sending connection request to '"+userReq+"'");
@@ -889,9 +1013,20 @@ class UserConnect{
 			System.out.println("Cannot send a connection request to this user.");
 		}
 	}
-	/*this will need to modified later in order to better suit the rest of the project
-	  the stored procedure should create a view that holds all connection possibilites for the user
-	  allowing for a quick check when viewing profiles if the connection option should be allowed */
+	
+	/*******************************************
+	* Method Name: ConnectionDepthCheck
+	* Programmer: Brandon Stevenson
+	* Date: 6/1/15
+	* Purpose: Checks for a valid connection
+	* level for the user to send a request
+	*
+	* Input: ProfNetwork object
+	*        String object
+	* 
+	* Ouput: None
+	*
+	*******************************************/
 	public static boolean ConnectionDepthCheck(ProfNetwork esql, String currentUser, String userReq){
 		boolean status = false;
 		List<List<String>> result = new ArrayList<List<String>>();
@@ -923,8 +1058,20 @@ class UserConnect{
 		return status;
 	}
 	
-	// will need to be updated to check for connection status or not
-	// maybe create procedue to return partial matches of name
+	/***********************************************
+	* Method Name: Search
+	* Programmer: Brandon Stevenson
+	* Date: 6/2/15
+	* Purpose: Allows user to search for other users
+	* by their real name with results coming back as
+	* userid
+	*
+	* Input: ProfNetwork object
+	*		 String object
+	*
+	* Output: None
+	*
+	************************************************/
 	public static void Search(ProfNetwork esql, String currentUser){
 		List<List<String>> result = new ArrayList<List<String>>();
 		try{
@@ -988,10 +1135,33 @@ class UserConnect{
 	
 } // end UserConnect
 
+/**********************************************
+* Class Name: Profile
+* Programmers: Brandon Stevenson, Cody Chapman
+* Date: 6/1/15
+* Purpose: Contains methods to manipulate the
+* user profile and view other users profiles
+*
+*
+*
+************************************************/
 class Profile{
 	public static Messenger msg = new Messenger(); // local global for accessing messenger methods
 	public static UserConnect conn = new UserConnect(); // local global for accessing userconnect methods
-	
+
+	/**********************************************
+	* Method Name: ProfileMenu
+	* Programmers: Brandon Stevenson, Cody Chapman
+	* Date: 6/1/15
+	* Purpose: Provides an interface to modify user
+	* profile
+	*
+	* Input: ProfNetwork object
+	*		 String object
+	*
+	* Output: None
+	*
+	***********************************************/
 	public static void ProfileMenu(ProfNetwork esql, String currentUser){
 		boolean getChoice = true;
 		while(getChoice){
@@ -1031,7 +1201,19 @@ class Profile{
 		}
 	}
 
-	// for listing the current users profile to them
+	/****************************************
+	* Method Name: GetCurrProfile
+	* Programmer: Brandon Stevenson
+	* Date: 6/2/15
+	* Purpose: Displays the current users 
+	* profile
+	*
+	* Input: ProfNetwork object
+	*		 String object
+	*
+	* Output: None
+	*
+	*****************************************/
 	public static void GetCurrProfile(ProfNetwork esql, String currentUser){
 		String query = String.format("SELECT name, email, date_of_birth FROM usr WHERE userid = '"+currentUser+"'");
 		List<List<String>> result = new ArrayList<List<String>>();
@@ -1094,7 +1276,21 @@ class Profile{
 		}
 	}
 	
-	// for displaying user profiles, will have check to see if connection or not
+	/*************************************
+	* Method Name: ViewUserProfile
+	* Programming: Brandon Stevenson
+	* Date: 6/6/15
+	* Purpose: Displays another users profile
+	* and gives the connection option only 
+	* if within 3 connection levels or not an
+	* existing friend already
+	*
+	* Input: ProfNetwork object
+	*		 String object
+	* 
+	* Output: None
+	*
+	**************************************/
 	public static void ViewUserProfile(ProfNetwork esql, String currentUser, String usrName){
 		System.out.println("\f\f\f\f\f\f\f\f\f\f\f\f\f\f");
 		boolean connection = false;

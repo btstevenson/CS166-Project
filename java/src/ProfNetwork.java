@@ -284,12 +284,12 @@ public class ProfNetwork {
                 System.out.println("3. Connections Menu");
 				System.out.println("4. Search");
                 System.out.println(".........................");
-                System.out.println("9. Log out");
+                System.out.println("9. Log out\n");
                 switch (readChoice()){
                    case 1: prof.ProfileMenu(esql, authorisedUser); break;
                    case 2: menu.MessageService(esql, authorisedUser); break;
                    case 3: conn.ConnectMenu(esql, authorisedUser); break;
-				   case 4: conn.Search(esql); break;
+				   case 4: conn.Search(esql, authorisedUser); break;
                    case 9: usermenu = false; 
 						   TableCleanup(esql, authorisedUser); break;
                    default : System.out.println("Unrecognized choice!"); break;
@@ -303,9 +303,9 @@ public class ProfNetwork {
          // make sure to cleanup the created table and close the connection.
          try{
             if(esql != null) {
-               System.out.print("Disconnecting from database...");
+               System.out.print("Logging off....");
                esql.cleanup ();
-               System.out.println("Done\n\nBye !");
+               System.out.println("Log off completed\n\nBye !");
             }//end if
          }catch (Exception e) {
             // ignored.
@@ -351,7 +351,8 @@ public class ProfNetwork {
          System.out.print("\tEnter user login: ");
          String login = in.readLine();
          System.out.print("\tEnter user password: ");
-         String password = in.readLine();
+         char[] passwordChars = System.console().readPassword();
+		 String password = new String(passwordChars);
          System.out.print("\tEnter user email: ");
          String email = in.readLine();
 
@@ -378,7 +379,8 @@ public class ProfNetwork {
          System.out.print("\tEnter user login: ");
          String login = in.readLine();
          System.out.print("\tEnter user password: ");
-         String password = in.readLine();
+         char [] passwordChars = System.console().readPassword();
+		 String password = new String(passwordChars);
 
          String query = String.format("SELECT * FROM USR WHERE userId = '%s' AND password = '%s'", login, password);
          int userNum = esql.executeQuery(query);
@@ -398,6 +400,14 @@ public class ProfNetwork {
       }
    }//end
 
+   /************************
+   * Method Name: TableCleanup
+   * Programmer: Brandon Stevenson
+   * Date: 6/7/15
+   * Purpose: Removes created table
+   * from the stored procedure
+   *
+   ************************/
    public static void TableCleanup(ProfNetwork esql, String currentUser){
 	   String query = String.format("DROP TABLE %s",  "\""+ currentUser +"\"");
 	   try{
@@ -428,7 +438,7 @@ class Messenger{
 	*          to message options
 	*
 	* Inputs: Profnetwork object
-	*		  String currenUser
+	*		  String object
 	*
 	* Return: none
 	*
@@ -455,7 +465,20 @@ class Messenger{
 			}
 		}
 	}
-
+	
+	/*********************************
+	* Method Name: ReadeMessageMenu
+	* Programmer: Brandon Stevenson
+	* Date: 5/28/15
+	* Purpose: Creates a menu for user
+	* to select options for received 
+	* messages
+	* Inputs: ProfNetwork object
+	*         String object
+	*
+	* Outputs: None
+	*
+	*********************************/
 	public static void ReadMessageMenu(ProfNetwork esql, String currentUser){
 		boolean getChoice = true;
 		while(getChoice){
@@ -500,7 +523,17 @@ class Messenger{
 			}
 		}
 	}
-	/* allows user to read recieved message */	
+	/**********************************
+	* Method Name: ReadMessage
+	* Programmer: Brandon Stevenson
+	* Date: 5/28/15
+	* Purpose: Allows user to read a
+	* received message.
+	* Inputs: ProfNetwork object
+	*		  String object
+	*
+	* Outputs: None
+	**********************************/	
 	public static void ReadMessage(ProfNetwork esql, String currentUser){
 		System.out.print("\t\nPlease enter the message id you would like to read: ");
 		try{
@@ -508,7 +541,7 @@ class Messenger{
 			int msgid = Integer.parseInt(input.trim());
 			try{
 				System.out.println();
-				String query = String.format("SELECT contents FROM message WHERE msgid = '%s' AND (delete_status = '0' OR delete_status = '1')", msgid);
+				String query = String.format("SELECT contents FROM message WHERE msgid = '%s' AND receiverid = '%s' AND (delete_status = '0' OR delete_status = '1')", msgid, currentUser);
 				int result = esql.executeQueryAndPrintResult(query);
 				if(result < 1){
 					System.out.println("No message found with that id. Please try again.");
@@ -538,7 +571,7 @@ class Messenger{
 			System.out.println("3. View a Sent Message");
 			System.out.println("4. Delete Sent Message");
 			System.out.println("---------");
-			System.out.println("9. Return to Messenger Menu");
+			System.out.println("9. Return to Messenger Menu\n");
 
 			switch(esql.readChoice()){
 				case 1: SendMessage(esql, currentUser);
@@ -575,6 +608,7 @@ class Messenger{
 	/* create triggers for setting delete_status and status for inserting messages */
 	// for sending messages from viewing someones profile
 	public static void SendMessageProfile(ProfNetwork esql, String currentUser, String receiverId){
+		System.out.println("\f\f\f\f\f\f\f\f\f\f");
 		try{
 			System.out.print("Please enter the message you want to send: ");
 			String contents = esql.in.readLine();
@@ -669,7 +703,7 @@ class Messenger{
 				System.err.println(e.getMessage());
 			}
 		} catch (Exception e){
-			System.err.println(e.getMessage());
+			System.out.println("Please enter a valid message id.");
 		}
 	}
 } // end Messenger
@@ -695,7 +729,7 @@ class UserConnect{
 			System.out.println("2. Accept/Decline Requests");
 			System.out.println("3. Send Connection Request");
 			System.out.println("---------");
-			System.out.println("9. Return to main menu");
+			System.out.println("9. Return to main menu\n");
 				
 			switch(esql.readChoice()){
 				case 1: ConnectionList(esql, currentUser); break;
@@ -730,7 +764,7 @@ class UserConnect{
 					System.out.println("\n1. View connection profile");
 					System.out.println("2. Send Message");
 					System.out.println("---------");
-					System.out.println("9. Return to previous menu");
+					System.out.println("9. Return to previous menu\n");
 					
 					int usrChoice = 0; 
 					switch(esql.readChoice()){
@@ -778,7 +812,7 @@ class UserConnect{
 					System.out.println("\n1. Accept request");
 					System.out.println("2. Reject request");
 					System.out.println("---------");
-					System.out.println("9. Return to Connection Menu");
+					System.out.println("9. Return to Connection Menu\n");
 
 					int reqChoice = 0;
 					switch(esql.readChoice()){
@@ -889,10 +923,9 @@ class UserConnect{
 		return status;
 	}
 	
-	// might need to add user paramater
 	// will need to be updated to check for connection status or not
 	// maybe create procedue to return partial matches of name
-	public static void Search(ProfNetwork esql){
+	public static void Search(ProfNetwork esql, String currentUser){
 		List<List<String>> result = new ArrayList<List<String>>();
 		try{
 			System.out.print("Please enter the first name of user: ");
@@ -902,11 +935,13 @@ class UserConnect{
 				String lastName = esql.in.readLine();
 				String fullName = ""+firstName+" " + lastName;
 				boolean getName = true;
+				System.out.println("\f\f\f\f\f\f\f\f\f\f\f\f\f\f");
 				System.out.print("Search Results: ");
-				String query = String.format("SELECT name FROM usr WHERE name = '"+fullName+"'");
+				String query = String.format("SELECT userid FROM usr WHERE name = '"+fullName+"'");
 				try{
 					result = esql.executeQueryAndReturnResult(query);
 					if(result.isEmpty()){
+						System.out.println("\f");
 						System.out.println("No results");
 					} else{
 						int count = 1;
@@ -920,16 +955,28 @@ class UserConnect{
 				} catch (Exception e){
 					System.err.println(e.getMessage());
 				}
+				int usrChoice = 0;
 				System.out.println("\n1. View Profile");
 				System.out.println("2. Send Message");
 				System.out.println("3. Search Again");
 				System.out.println("---------");
-				System.out.println("9. Return to Main Menu");
+				System.out.println("9. Return to Main Menu\n");
 				switch(esql.readChoice()){
-					case 1: break;
-					case 2: break;
-					case 3: Search(esql); break;
-					case 4: break;
+					case 1: System.out.print("Please enter the number of the user you wish to view: ");
+							try{
+								usrChoice = Integer.parseInt(esql.in.readLine().trim()) - 1;
+								prof.ViewUserProfile(esql, currentUser, result.get(usrChoice).get(0));
+							} catch (Exception e){
+							} break;
+					case 2: System.out.print("Please enter the number of the user you wish to send a message: ");
+							try{
+								usrChoice = Integer.parseInt(esql.in.readLine().trim()) - 1;
+								msg.SendMessageProfile(esql, currentUser, result.get(usrChoice).get(0));
+							} catch (Exception e){
+							} break;
+					case 3: Search(esql, currentUser); break;
+					case 9: break;
+					default: System.out.println("Invalid input. Please try again.");
 				}
 			} catch (Exception e){
 				System.err.println(e.getMessage());
@@ -989,8 +1036,9 @@ class Profile{
 		String query = String.format("SELECT name, email, date_of_birth FROM usr WHERE userid = '"+currentUser+"'");
 		List<List<String>> result = new ArrayList<List<String>>();
 		try{
+			System.out.println("\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f");
 			result =  esql.executeQueryAndReturnResult(query);
-			System.out.println("Name: "+result.get(0).get(0)+"");
+			System.out.println("\n\nName: "+result.get(0).get(0)+"");
 			System.out.println("Email: "+result.get(0).get(1)+"");
 			System.out.println("Date of Birth: "+result.get(0).get(2)+"");
 		} catch (Exception e){
@@ -1048,6 +1096,7 @@ class Profile{
 	
 	// for displaying user profiles, will have check to see if connection or not
 	public static void ViewUserProfile(ProfNetwork esql, String currentUser, String usrName){
+		System.out.println("\f\f\f\f\f\f\f\f\f\f\f\f\f\f");
 		boolean connection = false;
 		List<List<String>> result = new ArrayList<List<String>>();
 		String query = String.format("SELECT connectionid AS userid FROM connection_usr WHERE userid = '"+usrName+"' AND connectionid = '"+currentUser+"' AND status = 'Accept' UNION ALL SELECT userid FROM connection_usr WHERE userid = '"+currentUser+"' AND connectionid = '"+usrName+"' AND status = 'Accept'");
@@ -1132,7 +1181,8 @@ class Profile{
 			} catch (Exception e){
 				System.err.println(e.getMessage());
 			}
-			System.out.println("9.Return to previous menu");
+			System.out.println("---------");
+			System.out.println("9.Return to previous menu\n");
 			switch(esql.readChoice()){
 				case 1: ViewUserConnections(esql, currentUser, usrName, connection); break;
 				case 2: msg.SendMessageProfile(esql, currentUser, usrName); break;
@@ -1144,10 +1194,6 @@ class Profile{
 			}
 		}
 		
-	}
-	
-	// allows to search any user
-	public static void SearchProfile(ProfNetwork esql){
 	}
 
 	//The users first chance to enter work experience information
@@ -1421,6 +1467,7 @@ class Profile{
 		}
 		
 		boolean getChoice = true;
+		System.out.println("\f\f\f\f\f\f\f\f\f\f\f\f\f\f");
 		while(getChoice){
 			System.out.println(""+usrName+"'s connection list:");
 			int count = 1;
@@ -1434,10 +1481,10 @@ class Profile{
 				System.out.println("Only has you as a connection.");
 			}
 			System.out.println();
-			System.out.println("1. View connection profile");
+			System.out.println("\n1. View connection profile");
 			System.out.println("2. Send message");
 			System.out.println("---------");
-			System.out.println("9. Return to previous menu");
+			System.out.println("9. Return to previous menu\n");
 			switch(esql.readChoice()){
 				case 1: System.out.print("Please enter the number of the connection you want to view: ");
 						try{

@@ -1,4 +1,10 @@
 /*
+Brandon Stevenson 861127232
+Cody Chapman 860931614
+Group #50
+*/
+
+/*
  * Template JAVA User Interface
  * =============================
  *
